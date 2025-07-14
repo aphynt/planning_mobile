@@ -1,0 +1,500 @@
+part of 'pages.dart';
+
+class KllhListPage extends StatefulWidget {
+  @override
+  _KllhListPageState createState() => _KllhListPageState();
+}
+
+class _KllhListPageState extends State<KllhListPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  bool isLoading = false;
+  List<Map<String, dynamic>> fuelStationList = [];
+  List<Map<String, dynamic>> filteredList = [];
+
+  // Controllers
+  final TextEditingController searchController = TextEditingController();
+  DateTime startDate = DateTime.now();
+  DateTime endDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    _animationController.forward();
+
+    _fetchFuelStationData();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchFuelStationData() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString(SharedPrefKeys.token);
+
+      final formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
+      final formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate);
+
+      final response = await http.get(
+        Uri.parse('http://36.67.119.212:9013/api/klkh/fuel-station?startDate=$formattedStartDate&endDate=$formattedEndDate'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        setState(() {
+          fuelStationList = List<Map<String, dynamic>>.from(responseData['data']);
+          filteredList = List.from(fuelStationList);
+        });
+      } else {
+        throw Exception('Failed to load fuel station data');
+      }
+    } catch (e) {
+      print('Error fetching fuel station data: $e');
+      showErrorDialog('Gagal memuat data: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _selectStartDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: startDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+    );
+    if (picked != null && picked != startDate) {
+      setState(() {
+        startDate = picked;
+        if (startDate.isAfter(endDate)) {
+          endDate = startDate;
+        }
+        _fetchFuelStationData();
+      });
+    }
+  }
+
+  Future<void> _selectEndDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: endDate,
+      firstDate: startDate,
+      lastDate: DateTime(2030),
+    );
+    if (picked != null && picked != endDate) {
+      setState(() {
+        endDate = picked;
+        _fetchFuelStationData();
+      });
+    }
+  }
+
+  Future<void> _downloadPdf(String id) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString(SharedPrefKeys.token);
+
+      final response = await http.get(
+        Uri.parse('http://36.67.119.212:9013/api/klkh/fuel-station/download/$id'),
+        headers: {
+          'Accept': 'application/pdf',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Save the PDF file
+        final directory = await getApplicationDocumentsDirectory();
+        final filePath = '${directory.path}/fuel_station_$id.pdf';
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
+
+        // Open the PDF file
+        OpenFile.open(filePath);
+        
+        showSuccessDialog('PDF berhasil didownload');
+      } else {
+        throw Exception('Failed to download PDF');
+      }
+    } catch (e) {
+      print('Error downloading PDF: $e');
+      showErrorDialog('Gagal mendownload PDF: $e');
+    }
+  }
+
+  Future<void> _deleteItem(String id) async {
+    bool confirm = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Konfirmasi'),
+        content: Text('Apakah Anda yakin ingin menghapus data ini?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Hapus', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString(SharedPrefKeys.token);
+
+      final response = await http.delete(
+        Uri.parse('http://36.67.119.212:9013/api/klkh/fuel-station/$id'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        showSuccessDialog('Data berhasil dihapus');
+        _fetchFuelStationData();
+      } else {
+        throw Exception('Failed to delete data');
+      }
+    } catch (e) {
+      print('Error deleting data: $e');
+      showErrorDialog('Gagal menghapus data: $e');
+    }
+  }
+
+  void _filterData(String query) {
+    setState(() {
+      filteredList = fuelStationList.where((item) {
+        final pit = item['PIT_KETERANGAN']?.toString().toLowerCase() ?? '';
+        final shift = item['SHIFT_KETERANGAN']?.toString().toLowerCase() ?? '';
+        final date = item['DATE']?.toString().toLowerCase() ?? '';
+        final searchLower = query.toLowerCase();
+
+        return pit.contains(searchLower) ||
+            shift.contains(searchLower) ||
+            date.contains(searchLower);
+      }).toList();
+    });
+  }
+
+  void showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.red, size: 28),
+              SizedBox(width: 10),
+              Text('Error', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK', style: TextStyle(color: Color(0xFF001932))),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.green, size: 28),
+              SizedBox(width: 10),
+              Text('Sukses', style: TextStyle(color: Colors.green)),
+            ],
+          ),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK', style: TextStyle(color: Color(0xFF001932))),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildFuelStationItem(Map<String, dynamic> item) {
+    return Card(
+      margin: EdgeInsets.only(bottom: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  item['PIT'] ?? 'Unknown PIT',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF001932),
+                ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF001932),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    item['SHIFT'] ?? 'Unknown Shift',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Tanggal: ${item['DATE'] ?? '-'}',
+              style: TextStyle(fontSize: 14),
+            ),
+            SizedBox(height: 4),
+            Text(
+              'Waktu: ${item['TIME'] ?? '-'}',
+              style: TextStyle(fontSize: 14),
+            ),
+            SizedBox(height: 4),
+            Text(
+              'Diketahui: ${item['DIKETAHUI_NAMA'] ?? '-'}',
+              style: TextStyle(fontSize: 14),
+            ),
+            SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.download, color: Color(0xFF001932)),
+                  onPressed: () => _downloadPdf(item['ID'].toString()),
+                ),
+                // IconButton(
+                //   icon: Icon(Icons.visibility, color: Color(0xFF001932)),
+                //   onPressed: () {
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //         builder: (context) => FuelStationDetailPage(
+                //           fuelStationData: item,
+                //         ),
+                //       ),
+                //     );
+                //   },
+                // ),
+                IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _deleteItem(item['ID'].toString()),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        title: Text('Daftar Checklist Fuel Station',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Color(0xFF001932),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(15),
+          ),
+        ),
+      ),
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: _selectStartDate,
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: 'Dari Tanggal',
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(DateFormat('dd MMM yyyy').format(startDate)),
+                                Icon(Icons.calendar_today, size: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: InkWell(
+                          onTap: _selectEndDate,
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: 'Sampai Tanggal',
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(DateFormat('dd MMM yyyy').format(endDate)),
+                                Icon(Icons.calendar_today, size: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      labelText: 'Cari...',
+                      prefixIcon: Icon(Icons.search),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Color(0xFF001932), width: 1.5),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                    ),
+                    onChanged: _filterData,
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: isLoading
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF001932)),
+                      ),
+                    )
+                  : filteredList.isEmpty
+                      ? Center(
+                          child: Text(
+                            'Tidak ada data ditemukan',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: _fetchFuelStationData,
+                          color: Color(0xFF001932),
+                          child: ListView.builder(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            itemCount: filteredList.length,
+                            itemBuilder: (context, index) {
+                              return _buildFuelStationItem(
+                                  filteredList[index]);
+                            },
+                          ),
+                        ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FuelStationPage(),
+            ),
+          ).then((_) => _fetchFuelStationData());
+        },
+        backgroundColor: Color(0xFF001932),
+        child: Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+}
