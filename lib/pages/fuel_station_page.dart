@@ -102,7 +102,7 @@ class _FuelStationPageState extends State<FuelStationPage>
       final token = prefs.getString(SharedPrefKeys.token);
 
       final response = await http.get(
-        Uri.parse('http://36.67.119.212:9013/api/area'),
+        Uri.parse('${baseUrl}/api/area'),
         headers: {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
@@ -133,7 +133,7 @@ class _FuelStationPageState extends State<FuelStationPage>
       final token = prefs.getString(SharedPrefKeys.token);
 
       final response = await http.get(
-        Uri.parse('http://36.67.119.212:9013/api/shift'),
+        Uri.parse('${baseUrl}/api/shift'),
         headers: {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
@@ -163,7 +163,7 @@ class _FuelStationPageState extends State<FuelStationPage>
       final token = prefs.getString(SharedPrefKeys.token);
 
       final response = await http.get(
-        Uri.parse('http://36.67.119.212:9013/api/users/diketahui'),
+        Uri.parse('${baseUrl}/api/users/diketahui'),
         headers: {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
@@ -227,95 +227,98 @@ class _FuelStationPageState extends State<FuelStationPage>
   }
 
   Future<void> submitData() async {
-  if (!_formKey.currentState!.validate()) {
-    return;
-  }
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-  setState(() {
-    isLoading = true;
-  });
-
-  try {
-    Map<String, dynamic> requestBody = {
-      'PIT': selectedPitId,
-      'SHIFT': selectedShiftId,
-      'DATE': dateController.text,
-      'TIME': timeController.text,
-      'ADDITIONAL_NOTES': additionalNotesController.text,
-      'DIKETAHUI': selectedDiketahuiNik,
-    };
-
-    // Add checklist items
-    checklistItems.forEach((key, value) {
-      requestBody['${key}_CHECK'] = checkValues[key];
-      requestBody['${key}_NOTE'] = noteControllers[key]!.text;
+    setState(() {
+      isLoading = true;
     });
 
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString(SharedPrefKeys.token);
-    print(jsonEncode(requestBody));
-    final response = await http.post(
-      Uri.parse('http://36.67.119.212:9013/api/klkh/fuel-station'),
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(requestBody),
-    );
+    try {
+      Map<String, dynamic> requestBody = {
+        'PIT': selectedPitId,
+        'SHIFT': selectedShiftId,
+        'DATE': dateController.text,
+        'TIME': timeController.text,
+        'ADDITIONAL_NOTES': additionalNotesController.text,
+        'DIKETAHUI': selectedDiketahuiNik,
+      };
 
-    final responseData = jsonDecode(response.body);
-    print(responseData);
-
-    if (response.statusCode == 201) {
-      // Show success dialog and redirect when OK is clicked
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            title: Row(
-              children: [
-                Icon(Icons.check_circle_outline, color: Colors.green, size: 28),
-                SizedBox(width: 10),
-                Text('Berhasil', style: TextStyle(color: Colors.green)),
-              ],
-            ),
-            content: Text(responseData['message'] ?? 'Data berhasil disimpan'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close dialog
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => KllhListPage(), // Replace with your list page
-                    ),
-                  );
-                },
-                child: Text('OK', style: TextStyle(color: Color(0xFF001932))),
-              ),
-            ],
-          );
-        },
-      );
-      _resetForm();
-    } else {
-      showErrorDialog(responseData['message'] ?? 'Gagal menyimpan data');
-    }
-  } catch (e) {
-    showErrorDialog('Terjadi kesalahan: $e');
-  } finally {
-    if (mounted) {
-      setState(() {
-        isLoading = false;
+      // Add checklist items
+      checklistItems.forEach((key, value) {
+        requestBody['${key}_CHECK'] = checkValues[key];
+        requestBody['${key}_NOTE'] = noteControllers[key]!.text;
       });
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString(SharedPrefKeys.token);
+      print(jsonEncode(requestBody));
+      final response = await http.post(
+        Uri.parse('${baseUrl}/api/klkh/fuel-station'),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      final responseData = jsonDecode(response.body);
+      print(responseData);
+
+      if (response.statusCode == 201) {
+        // Show success dialog and redirect when OK is clicked
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              title: Row(
+                children: [
+                  Icon(Icons.check_circle_outline,
+                      color: Colors.green, size: 28),
+                  SizedBox(width: 10),
+                  Text('Berhasil', style: TextStyle(color: Colors.green)),
+                ],
+              ),
+              content:
+                  Text(responseData['message'] ?? 'Data berhasil disimpan'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close dialog
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            KllhListPage(), // Replace with your list page
+                      ),
+                    );
+                  },
+                  child: Text('OK', style: TextStyle(color: Color(0xFF001932))),
+                ),
+              ],
+            );
+          },
+        );
+        _resetForm();
+      } else {
+        showErrorDialog(responseData['message'] ?? 'Gagal menyimpan data');
+      }
+    } catch (e) {
+      showErrorDialog('Terjadi kesalahan: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
-}
 
   void _resetForm() {
     _formKey.currentState!.reset();

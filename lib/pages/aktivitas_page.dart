@@ -69,7 +69,7 @@ class _AktivitasPageState extends State<AktivitasPage>
       final token = prefs.getString(SharedPrefKeys.token);
 
       final response = await http.get(
-        Uri.parse('http://36.67.119.212:9013/api/activity/all?bulan=$selectedMonth'),
+        Uri.parse('${baseUrl}/api/activity/all?bulan=$selectedMonth'),
         headers: {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
@@ -187,8 +187,8 @@ class _AktivitasPageState extends State<AktivitasPage>
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: (item['STATUSENABLED'] == "1") 
-                        ? Colors.green 
+                    color: (item['STATUSENABLED'] == "1")
+                        ? Colors.green
                         : Colors.red,
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -302,10 +302,11 @@ class _AktivitasPageState extends State<AktivitasPage>
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFF001932), width: 1.5),
+                        borderSide:
+                            BorderSide(color: Color(0xFF001932), width: 1.5),
                       ),
-                      contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                     onChanged: _filterData,
                   ),
@@ -343,8 +344,8 @@ class _AktivitasPageState extends State<AktivitasPage>
               child: isLoading
                   ? Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFF001932)),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFF001932)),
                       ),
                     )
                   : filteredList.isEmpty

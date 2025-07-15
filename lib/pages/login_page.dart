@@ -60,17 +60,19 @@ class _LoginPageState extends State<LoginPage>
     });
 
     try {
-      final response = await http.post(
-        Uri.parse('http://36.67.119.212:9013/api/login'),
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'nik': nikController.text,
-          'password': passwordController.text,
-        }),
-      ).timeout(Duration(seconds: 8));
+      final response = await http
+          .post(
+            Uri.parse('${baseUrl}/api/login'),
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'nik': nikController.text,
+              'password': passwordController.text,
+            }),
+          )
+          .timeout(Duration(seconds: 8));
 
       final responseData = jsonDecode(response.body);
 
@@ -210,11 +212,11 @@ class _LoginPageState extends State<LoginPage>
                               child: Stack(
                                 children: [
                                   Image.asset(
-                      'assets/images/splash.png',
-                      width: 200,
-                      height: 200,
-                      fit: BoxFit.contain,
-                    ),
+                                    'assets/images/splash.png',
+                                    width: 200,
+                                    height: 200,
+                                    fit: BoxFit.contain,
+                                  ),
                                 ],
                               ),
                             ),
@@ -344,7 +346,8 @@ class _LoginPageState extends State<LoginPage>
                             ],
                           ),
                           TextButton(
-                            onPressed: showForgotPasswordDialog, // Updated to call the new dialog
+                            onPressed:
+                                showForgotPasswordDialog, // Updated to call the new dialog
                             child: Text(
                               'Lupa password?',
                               style: TextStyle(

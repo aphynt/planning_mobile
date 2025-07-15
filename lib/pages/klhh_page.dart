@@ -57,7 +57,8 @@ class _KllhListPageState extends State<KllhListPage>
       final formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate);
 
       final response = await http.get(
-        Uri.parse('http://36.67.119.212:9013/api/klkh/fuel-station?startDate=$formattedStartDate&endDate=$formattedEndDate'),
+        Uri.parse(
+            '${baseUrl}/api/klkh/fuel-station?startDate=$formattedStartDate&endDate=$formattedEndDate'),
         headers: {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
@@ -67,7 +68,8 @@ class _KllhListPageState extends State<KllhListPage>
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         setState(() {
-          fuelStationList = List<Map<String, dynamic>>.from(responseData['data']);
+          fuelStationList =
+              List<Map<String, dynamic>>.from(responseData['data']);
           filteredList = List.from(fuelStationList);
         });
       } else {
@@ -122,7 +124,7 @@ class _KllhListPageState extends State<KllhListPage>
       final token = prefs.getString(SharedPrefKeys.token);
 
       final response = await http.get(
-        Uri.parse('http://36.67.119.212:9013/api/klkh/fuel-station/download/$id'),
+        Uri.parse('${baseUrl}/api/klkh/fuel-station/download/$id'),
         headers: {
           'Accept': 'application/pdf',
           'Authorization': 'Bearer $token',
@@ -138,7 +140,7 @@ class _KllhListPageState extends State<KllhListPage>
 
         // Open the PDF file
         OpenFile.open(filePath);
-        
+
         showSuccessDialog('PDF berhasil didownload');
       } else {
         throw Exception('Failed to download PDF');
@@ -175,7 +177,7 @@ class _KllhListPageState extends State<KllhListPage>
       final token = prefs.getString(SharedPrefKeys.token);
 
       final response = await http.delete(
-        Uri.parse('http://36.67.119.212:9013/api/klkh/fuel-station/$id'),
+        Uri.parse('${baseUrl}/api/klkh/fuel-station/$id'),
         headers: {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
@@ -282,7 +284,7 @@ class _KllhListPageState extends State<KllhListPage>
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF001932),
-                ),
+                  ),
                 ),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -393,7 +395,8 @@ class _KllhListPageState extends State<KllhListPage>
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(DateFormat('dd MMM yyyy').format(startDate)),
+                                Text(DateFormat('dd MMM yyyy')
+                                    .format(startDate)),
                                 Icon(Icons.calendar_today, size: 20),
                               ],
                             ),
@@ -442,10 +445,11 @@ class _KllhListPageState extends State<KllhListPage>
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFF001932), width: 1.5),
+                        borderSide:
+                            BorderSide(color: Color(0xFF001932), width: 1.5),
                       ),
-                      contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                     onChanged: _filterData,
                   ),
@@ -456,8 +460,8 @@ class _KllhListPageState extends State<KllhListPage>
               child: isLoading
                   ? Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFF001932)),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFF001932)),
                       ),
                     )
                   : filteredList.isEmpty
@@ -474,8 +478,7 @@ class _KllhListPageState extends State<KllhListPage>
                             padding: EdgeInsets.symmetric(horizontal: 16),
                             itemCount: filteredList.length,
                             itemBuilder: (context, index) {
-                              return _buildFuelStationItem(
-                                  filteredList[index]);
+                              return _buildFuelStationItem(filteredList[index]);
                             },
                           ),
                         ),
