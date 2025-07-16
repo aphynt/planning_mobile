@@ -72,11 +72,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           SafeArea(
             child: Column(
               children: [
-                const SizedBox(height: 100),
+                const SizedBox(height: 300),
                 Center(
                   child: Image.asset(
                     'assets/images/splash.png',
-                    width: 180,
+                    width: 300,
                     fit: BoxFit.contain,
                   ),
                 ),

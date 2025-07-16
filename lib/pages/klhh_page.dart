@@ -275,17 +275,14 @@ class _KllhListPageState extends State<KllhListPage>
           children: [
             // Background image
             Positioned.fill(
-              child: Opacity(
-                opacity: 0.7,
-                child: Image.asset(
-                  'assets/images/background3.jpg',
+              child: Image.asset(
+                  'assets/images/background5.jpg',
                   fit: BoxFit.cover,
                 ),
-              ),
             ),
             // Blur overlay
             BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              filter: ui.ImageFilter.blur(sigmaX: 1, sigmaY: 1),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.4),
