@@ -200,14 +200,14 @@ class _KllhListPageState extends State<KllhListPage>
   void _filterData(String query) {
     setState(() {
       filteredList = fuelStationList.where((item) {
-        final pit = item['PIT_KETERANGAN']?.toString().toLowerCase() ?? '';
-        final shift = item['SHIFT_KETERANGAN']?.toString().toLowerCase() ?? '';
-        final date = item['DATE']?.toString().toLowerCase() ?? '';
+        final namaDiketahuiSearch = item['NAMA_DIKETAHUI']?.toString().toLowerCase() ?? '';
+        final shiftSearch = item['SHIFT']?.toString().toLowerCase() ?? '';
+        final pitSearch = item['PIT']?.toString().toLowerCase() ?? '';
         final searchLower = query.toLowerCase();
 
-        return pit.contains(searchLower) ||
-            shift.contains(searchLower) ||
-            date.contains(searchLower);
+        return namaDiketahuiSearch.contains(searchLower) ||
+            shiftSearch.contains(searchLower) ||
+            pitSearch.contains(searchLower);
       }).toList();
     });
   }
@@ -267,104 +267,115 @@ class _KllhListPageState extends State<KllhListPage>
   }
 
   Widget _buildFuelStationItem(Map<String, dynamic> item) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 16), // Dipindah ke sini
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          children: [
-            // Background image
-            Positioned.fill(
-              child: Image.asset(
-                  'assets/images/background5.jpg',
-                  fit: BoxFit.cover,
-                ),
+  return Container(
+    margin: EdgeInsets.only(bottom: 12), // lebih rapat antar card
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Stack(
+        children: [
+          // Background image
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/background5.jpg',
+              fit: BoxFit.cover,
             ),
-            // Blur overlay
-            BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 1, sigmaY: 1),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.4),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withOpacity(0.2)),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            item['PIT'] ?? 'Unknown PIT',
+          ),
+          // Blur overlay
+          BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.2)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          item['PIT'] ?? 'Unknown PIT',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: item['VERIFIED_DIKETAHUI'] == null
+                                ? Colors.red
+                                : Colors.green[700],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            item['VERIFIED_DIKETAHUI'] == null
+                                ? 'Belum diverifikasi'
+                                : 'Sudah diverifikasi',
                             style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
                               color: Colors.white,
+                              fontSize: 11,
                             ),
                           ),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: item['VERIFIED_DIKETAHUI'] == null
-                                  ? Colors.red
-                                  : Colors.green[700],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              item['VERIFIED_DIKETAHUI'] == null
-                                  ? 'Belum diverifikasi'
-                                  : 'Sudah diverifikasi',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Tanggal: ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
-                        style: TextStyle(fontSize: 14, color: Colors.white),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Waktu: ${item['TIME'] ?? '-'}',
-                        style: TextStyle(fontSize: 14, color: Colors.white),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Diketahui: ${item['NAMA_DIKETAHUI'] ?? '-'}',
-                        style: TextStyle(fontSize: 14, color: Colors.white),
-                      ),
-                      SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      'Tanggal: ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
+                      style: TextStyle(fontSize: 13, color: Colors.white),
+                    ),
+                    SizedBox(height: 3),
+                    Text(
+                      'Waktu: ${item['TIME'] ?? '-'}',
+                      style: TextStyle(fontSize: 13, color: Colors.white),
+                    ),
+                    SizedBox(height: 3),
+                    Text(
+                      'Diketahui: ${item['NAMA_DIKETAHUI'] ?? '-'}',
+                      style: TextStyle(fontSize: 13, color: Colors.white),
+                    ),
+                    // Tombol aksi
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(right: 20), // Jarak kanan dari tombol pertama
+                          child: IconButton(
                             icon: Icon(Icons.download, color: Colors.white),
+                            iconSize: 20,
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
                             onPressed: () => _downloadPdf(item['ID'].toString()),
                           ),
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _deleteItem(item['ID'].toString()),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          iconSize: 20,
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(),
+                          onPressed: () => _deleteItem(item['ID'].toString()),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
+
 
 
 
