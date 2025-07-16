@@ -735,7 +735,7 @@ class _MainPageState extends State<MainPage> {
                                   children: [
                                     
                                     Text(
-                                      'Semangat Pagi, ${user['name'] ?? 'User'}!',
+                                      'Hi, ${user['name'] ?? 'User'}!',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,

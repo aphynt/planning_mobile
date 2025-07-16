@@ -17,7 +17,7 @@ part 'shared_pref_keys.dart';
 part 'splash_screen.dart';
 part 'login_page.dart';
 part 'main_page.dart';
-part 'fuel_station_page.dart';
+part 'klkh_insert_fuel_station_page.dart';
 part 'klhh_page.dart';
 part 'aktivitas_page.dart';
 

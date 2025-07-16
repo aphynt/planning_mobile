@@ -32,32 +32,38 @@ class _FuelStationPageState extends State<FuelStationPage>
   String? selectedDiketahuiNik;
 
   // Checklist items with their corresponding note controllers
-  final Map<String, String> checklistItems = {
-    'PERMUKAAN_TANAH_RATA': 'Permukaan Tanah Rata',
-    'PERMUKAAN_TANAH_LICIN': 'Permukaan Tanah Licin',
-    'LOKASI_JAUH_LINTASAN': 'Lokasi Jauh Lintasan',
-    'TIDAK_CECERAN_B3': 'Tidak Ceceran B3',
-    'PARKIR_FUELTRUCK': 'Parkir Fuel Truck',
-    'PARKIR_LV': 'Parkir LV',
-    'LAMPU_KERJA': 'Lampu Kerja',
-    'FUEL_GENSET': 'Fuel Genset',
-    'AIR_BERSIH_TANDON': 'Air Bersih Tandon',
-    'SOP_JSA': 'SOP JSA',
-    'SAFETY_POST': 'Safety Post',
-    'RAMBU_APD': 'Rambu APD',
-    'PERLENGKAPAN_KERJA': 'Perlengkapan Kerja',
-    'APAB_APAR': 'APAB APAR',
-    'P3K_EYEWASH': 'P3K Eyewash',
-    'INSPEKSI_APAR': 'Inspeksi APAR',
-    'FORM_CHECKLIST_REFUELING': 'Form Checklist Refueling',
-    'TEMPAT_SAMPAH': 'Tempat Sampah',
-    'MINEPERMIT': 'Mine Permit',
-    'SIMPER_OPERATOR': 'Simper Operator',
-    'PADLOCK': 'Padlock',
-    'WADAH_PENAMPUNG': 'Wadah Penampung',
-    'WHEEL_CHOCK': 'Wheel Chock',
-    'RADIO_KOMUNIKASI': 'Radio Komunikasi',
-    'APD_STANDAR': 'APD Standar',
+final Map<String, Map<String, String>> checklistItems = {
+    'Lokasi Kerja': {
+      'PERMUKAAN_TANAH_RATA': 'Permukaan tanah rata dan tidak berlubang',
+      'PERMUKAAN_TANAH_LICIN': 'Permukaan tanah tidak licin',
+      'LOKASI_JAUH_LINTASAN': 'Lokasi kerja jauh dengan lintasan aktif angkutan',
+      'TIDAK_CECERAN_B3': 'Tidak ada ceceran B3',
+      'PARKIR_FUELTRUCK': 'Area parkir khusus Fuel Truck untuk penyetokan tersedia',
+      'PARKIR_LV': 'Area parkir khusus untuk LV tersedia',
+      'LAMPU_KERJA': 'Semua lampu kerja menyala dengan normal dan memadai untuk kerja malam hari',
+      'FUEL_GENSET': 'Sisa fuel genset >10% kapasitas tangki',
+      'AIR_BERSIH_TANDON': 'Sisa air dalam tandon air bersih >30% kapasitas tandon'
+    },
+    'Perlengkapan Kerja': {
+    'SOP_JSA': 'Tersedia SOP/ JSA untuk pekerjaan yang akan di lakukan',
+    'SAFETY_POST': 'Terpasang safety post sebagai batas berhenti unit untuk refueling',
+    'RAMBU_APD': 'Terpasang rambu peringatan dan rambu APD',
+    'PERLENGKAPAN_KERJA': 'Perlengkapan kerja ditata dengan rapi & tidak berserakan',
+    'APAB_APAR': 'Tersedia APAB dan APAR',
+    'P3K_EYEWASH': 'Tersedia kotak P3K dan Eyewash',
+    'INSPEKSI_APAR': 'Terdapat tag inspeksi APAR dan eyewash yang sudah di inspeksi',
+    'FORM_CHECKLIST_REFUELING': 'Tersedia form checklist peralatan Refueling',
+    'TEMPAT_SAMPAH': 'Tersedia tiga wadah / tempat penampung sampah'
+    },
+    'Kegiatan Refueling Unit A2B': {
+    'MINEPERMIT': 'Fuelman memiliki dan membawa minepermit sebagai izin kerja',
+    'SIMPER_OPERATOR': 'Operator Fuel Truck memiliki dan membawa SIMPER sesuai peralatan yang digunakan',
+    'PADLOCK': 'Tersedia Padlock untuk kegiatan refueling',
+    'WADAH_PENAMPUNG': 'Tersedia wadah penampung untuk kegiatan Refueling',
+    'WHEEL_CHOCK': 'Tersedia ganjal / Wheel Chock',
+    'RADIO_KOMUNIKASI': 'Tersedia Radio Komunikasi',
+    'APD_STANDAR': 'Pekerja memakai APD standar dan APD tambahan jika di perlukan'
+    },
   };
 
   // Maps to store check values and note controllers
@@ -730,9 +736,25 @@ class _FuelStationPageState extends State<FuelStationPage>
                   ),
                 ),
                 SizedBox(height: 16),
-                ...checklistItems.entries
-                    .map((entry) => _buildChecklistItem(entry.key, entry.value))
-                    .toList(),
+                ...checklistItems.entries.expand((entry) {
+                  final category = entry.key;
+                  final items = entry.value;
+
+                  return [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        category,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF001932),
+                        ),
+                      ),
+                    ),
+                    ...items.entries.map((subEntry) => _buildChecklistItem(subEntry.key, subEntry.value))
+                  ];
+                }).toList(),
 
                 // Additional Notes Section
                 Card(
