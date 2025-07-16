@@ -60,19 +60,17 @@ class _LoginPageState extends State<LoginPage>
     });
 
     try {
-      final response = await http
-          .post(
-            Uri.parse('${baseUrl}/api/login'),
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-            },
-            body: jsonEncode({
-              'nik': nikController.text,
-              'password': passwordController.text,
-            }),
-          )
-          .timeout(Duration(seconds: 8));
+      final response = await http.post(
+        Uri.parse('${baseUrl}/api/login'),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'nik': nikController.text,
+          'password': passwordController.text,
+        }),
+      ).timeout(Duration(seconds: 8));
 
       final responseData = jsonDecode(response.body);
 
@@ -115,7 +113,7 @@ class _LoginPageState extends State<LoginPage>
             children: [
               Icon(Icons.error_outline, color: Colors.red, size: 28),
               SizedBox(width: 10),
-              Text('Error', style: TextStyle(color: Colors.red)),
+              Text('Info', style: TextStyle(color: Colors.red)),
             ],
           ),
           content: Text(message),
@@ -212,11 +210,11 @@ class _LoginPageState extends State<LoginPage>
                               child: Stack(
                                 children: [
                                   Image.asset(
-                                    'assets/images/splash.png',
-                                    width: 200,
-                                    height: 200,
-                                    fit: BoxFit.contain,
-                                  ),
+                      'assets/images/splash.png',
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.contain,
+                    ),
                                 ],
                               ),
                             ),
@@ -346,8 +344,7 @@ class _LoginPageState extends State<LoginPage>
                             ],
                           ),
                           TextButton(
-                            onPressed:
-                                showForgotPasswordDialog, // Updated to call the new dialog
+                            onPressed: showForgotPasswordDialog, // Updated to call the new dialog
                             child: Text(
                               'Lupa password?',
                               style: TextStyle(
@@ -421,7 +418,7 @@ class _LoginPageState extends State<LoginPage>
                             ),
                             children: [
                               TextSpan(
-                                text: 'IT FMS Support',
+                                text: 'IT Support',
                                 style: TextStyle(
                                   color: Color(0xFF001932), // Primary color
                                   fontWeight: FontWeight.w500,

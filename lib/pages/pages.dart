@@ -21,4 +21,4 @@ part 'fuel_station_page.dart';
 part 'klhh_page.dart';
 part 'aktivitas_page.dart';
 
-String baseUrl = "http://36.67.119.214:9013";
+const String baseUrl = "http://36.67.119.212:9013";
