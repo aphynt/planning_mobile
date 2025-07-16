@@ -32,7 +32,7 @@ class _FuelStationPageState extends State<FuelStationPage>
   String? selectedDiketahuiNik;
 
   // Checklist items with their corresponding note controllers
-final Map<String, Map<String, String>> checklistItems = {
+final Map<String, Map<String, String>> categorizedChecklistItems = {
     'Lokasi Kerja': {
       'PERMUKAAN_TANAH_RATA': 'Permukaan tanah rata dan tidak berlubang',
       'PERMUKAAN_TANAH_LICIN': 'Permukaan tanah tidak licin',
@@ -87,9 +87,11 @@ final Map<String, Map<String, String>> checklistItems = {
     _animationController.forward();
 
     // Initialize check values and note controllers
-    checklistItems.forEach((key, value) {
-      checkValues[key] = 'n/a';
-      noteControllers[key] = TextEditingController();
+    categorizedChecklistItems.forEach((category, items) {
+      items.forEach((key, value) {
+        checkValues[key] = 'n/a';
+        noteControllers[key] = TextEditingController();
+      });
     });
 
     // Set default date and time
@@ -252,9 +254,11 @@ final Map<String, Map<String, String>> checklistItems = {
       };
 
       // Add checklist items
-      checklistItems.forEach((key, value) {
-        requestBody['${key}_CHECK'] = checkValues[key];
-        requestBody['${key}_NOTE'] = noteControllers[key]!.text;
+      categorizedChecklistItems.forEach((category, items) {
+        items.forEach((key, value) {
+          requestBody['${key}_CHECK'] = checkValues[key];
+          requestBody['${key}_NOTE'] = noteControllers[key]!.text;
+        });
       });
 
       final prefs = await SharedPreferences.getInstance();
@@ -338,9 +342,11 @@ final Map<String, Map<String, String>> checklistItems = {
     additionalNotesController.clear();
 
     setState(() {
-      checklistItems.forEach((key, value) {
-        checkValues[key] = 'n/a';
-        noteControllers[key]!.clear();
+      categorizedChecklistItems.forEach((category, items) {
+        items.forEach((key, value) {
+          checkValues[key] = 'n/a';
+          noteControllers[key]?.clear();
+        });
       });
     });
   }
@@ -590,7 +596,28 @@ final Map<String, Map<String, String>> checklistItems = {
                             },
                             validator: (value) {
                               if (value == null) {
-                                return 'PIT harus dipilih';
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Row(
+                                        children: [
+                                          Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                                          SizedBox(width: 8),
+                                          Text('Peringatan'),
+                                        ],
+                                      ),
+                                      content: Text('PIT harus dipilih'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.of(context).pop(),
+                                          child: Text('OK'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                });
+                                return ''; // Tetap kembalikan string agar validator tidak error
                               }
                               return null;
                             },
@@ -636,7 +663,28 @@ final Map<String, Map<String, String>> checklistItems = {
                             },
                             validator: (value) {
                               if (value == null) {
-                                return 'Shift harus dipilih';
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Row(
+                                        children: [
+                                          Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                                          SizedBox(width: 8),
+                                          Text('Peringatan'),
+                                        ],
+                                      ),
+                                      content: Text('Shift harus dipilih'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.of(context).pop(),
+                                          child: Text('OK'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                });
+                                return ''; // Tetap kembalikan string agar validator tidak error
                               }
                               return null;
                             },
@@ -736,7 +784,7 @@ final Map<String, Map<String, String>> checklistItems = {
                   ),
                 ),
                 SizedBox(height: 16),
-                ...checklistItems.entries.expand((entry) {
+                ...categorizedChecklistItems.entries.expand((entry) {
                   final category = entry.key;
                   final items = entry.value;
 

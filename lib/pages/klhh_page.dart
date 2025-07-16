@@ -1,5 +1,6 @@
 part of 'pages.dart';
 
+
 class KllhListPage extends StatefulWidget {
   @override
   _KllhListPageState createState() => _KllhListPageState();
@@ -266,89 +267,110 @@ class _KllhListPageState extends State<KllhListPage>
   }
 
   Widget _buildFuelStationItem(Map<String, dynamic> item) {
-    return Card(
-      margin: EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      margin: EdgeInsets.only(bottom: 16), // Dipindah ke sini
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  item['PIT'] ?? 'Unknown PIT',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF001932),
+            // Background image
+            Positioned.fill(
+              child: Opacity(
+                opacity: 0.7,
+                child: Image.asset(
+                  'assets/images/background3.jpg',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            // Blur overlay
+            BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withOpacity(0.2)),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            item['PIT'] ?? 'Unknown PIT',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: item['VERIFIED_DIKETAHUI'] == null
+                                  ? Colors.red
+                                  : Colors.green[700],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              item['VERIFIED_DIKETAHUI'] == null
+                                  ? 'Belum diverifikasi'
+                                  : 'Sudah diverifikasi',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Tanggal: ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
+                        style: TextStyle(fontSize: 14, color: Colors.white),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Waktu: ${item['TIME'] ?? '-'}',
+                        style: TextStyle(fontSize: 14, color: Colors.white),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Diketahui: ${item['NAMA_DIKETAHUI'] ?? '-'}',
+                        style: TextStyle(fontSize: 14, color: Colors.white),
+                      ),
+                      SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.download, color: Colors.white),
+                            onPressed: () => _downloadPdf(item['ID'].toString()),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteItem(item['ID'].toString()),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF001932),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    item['SHIFT'] ?? 'Unknown Shift',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Tanggal: ${item['DATE'] ?? '-'}',
-              style: TextStyle(fontSize: 14),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'Waktu: ${item['TIME'] ?? '-'}',
-              style: TextStyle(fontSize: 14),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'Diketahui: ${item['DIKETAHUI_NAMA'] ?? '-'}',
-              style: TextStyle(fontSize: 14),
-            ),
-            SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.download, color: Color(0xFF001932)),
-                  onPressed: () => _downloadPdf(item['ID'].toString()),
-                ),
-                // IconButton(
-                //   icon: Icon(Icons.visibility, color: Color(0xFF001932)),
-                //   onPressed: () {
-                //     Navigator.push(
-                //       context,
-                //       MaterialPageRoute(
-                //         builder: (context) => FuelStationDetailPage(
-                //           fuelStationData: item,
-                //         ),
-                //       ),
-                //     );
-                //   },
-                // ),
-                IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _deleteItem(item['ID'].toString()),
-                ),
-              ],
+              ),
             ),
           ],
         ),
       ),
     );
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {

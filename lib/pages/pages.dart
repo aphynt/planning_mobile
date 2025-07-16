@@ -10,6 +10,7 @@ import 'package:carousel_slider/carousel_controller.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'dart:ui' as ui;
 // import 'package:survey/models/models.dart';
 // import '../services/auth_service.dart';
 
