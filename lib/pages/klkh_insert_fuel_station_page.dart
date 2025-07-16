@@ -102,6 +102,20 @@ final Map<String, Map<String, String>> categorizedChecklistItems = {
     _fetchPitData();
     _fetchShiftData();
     _fetchDiketahuiData();
+
+    Future.delayed(Duration(seconds: 3), () {
+      if (pitList.isEmpty) {
+        _fetchPitData();
+      }
+
+      if (shiftList.isEmpty) {
+        _fetchShiftData();
+      }
+
+      if (diketahuiList.isEmpty) {
+        _fetchDiketahuiData();
+      }
+    });
   }
 
   Future<void> _fetchPitData() async {
