@@ -72,21 +72,31 @@ Future<List<Banner>> fetchBanners() async {
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString(SharedPrefKeys.token);
 
-  final response = await http.get(
-    Uri.parse('${baseUrl}/api/banner'),
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer ${token}', // Uncomment if using token
-    },
-  );
+  while (true) {
+    try {
+      final response = await http.get(
+        Uri.parse('${baseUrl}/api/banner'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-  if (response.statusCode == 200) {
-    final jsonResponse = json.decode(response.body);
-    final List<dynamic> bannerData = jsonResponse['data'];
-    return bannerData.map((banner) => Banner.fromJson(banner)).toList();
-  } else {
-    throw Exception('Failed to load banners');
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        final List<dynamic> bannerData = jsonResponse['data'];
+
+        if (bannerData.isNotEmpty) {
+          return bannerData.map((banner) => Banner.fromJson(banner)).toList();
+        }
+      }
+    } catch (e) {
+      print('Error fetching banners: $e');
+    }
+
+    // Tunggu 3 detik sebelum mencoba lagi
+    await Future.delayed(Duration(seconds: 3));
   }
 }
 
@@ -375,7 +385,7 @@ class _MainPageState extends State<MainPage> {
             borderRadius: BorderRadius.circular(15),
           ),
           title: Text('Info'),
-          content: Text('Fitur ini dalam pengembangan!'),
+          content: Text('Coming Soon!'),
           actions: <Widget>[
             TextButton(
               child: Text('Tutup'),
@@ -850,7 +860,7 @@ class _MainPageState extends State<MainPage> {
                       crossAxisSpacing: 12,
                       childAspectRatio: 0.9,
                       children: [
-                        _buildQuickAction('KLKH', Icons.assignment_turned_in, () {
+                        _buildQuickAction('KLKH Fuel Station', Icons.assignment_turned_in, () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -861,7 +871,10 @@ class _MainPageState extends State<MainPage> {
                         _buildQuickAction('KKH', Icons.engineering, () {
                           _showComingSoonDialog();
                         }),
-                        _buildQuickAction('Fuel Station', Icons.local_gas_station, () {
+                        _buildQuickAction('FuelMan', Icons.local_gas_station, () {
+                          _showComingSoonDialog();
+                        }),
+                        _buildQuickAction('P2H', Icons.assignment, () {
                           _showComingSoonDialog();
                         }),
                       ],

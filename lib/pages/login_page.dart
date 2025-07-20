@@ -418,7 +418,7 @@ class _LoginPageState extends State<LoginPage>
                             ),
                             children: [
                               TextSpan(
-                                text: 'IT Support',
+                                text: 'IT - FMS Support',
                                 style: TextStyle(
                                   color: Color(0xFF001932), // Primary color
                                   fontWeight: FontWeight.w500,

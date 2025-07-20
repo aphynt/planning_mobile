@@ -1,7 +1,7 @@
 name: survey
-description: "A new Flutter project."
+description: "Planning E-Report"
 publish_to: "none"
-version: 0.1.0
+version: 1.0.0
 
 environment:
   sdk: ^3.6.2
@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.13.5
+  http: ^1.4.0
   intl: ^0.20.2
   shared_preferences: ^2.5.3
   carousel_slider: ^5.1.1
@@ -17,11 +17,16 @@ dependencies:
   open_file: ^3.2.1
   path_provider: ^2.0.11
   flutter_launcher_icons: ^0.14.4
+  firebase_core: ^3.15.1
+  firebase_messaging: ^15.2.9
+  flutter_local_notifications: ^17.1.2
+  qr_flutter: ^4.0.0
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
