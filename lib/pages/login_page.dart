@@ -137,7 +137,7 @@ class _LoginPageState extends State<LoginPage>
             borderRadius: BorderRadius.circular(15),
           ),
           title: Text('Lupa Password'),
-          content: Text('Untuk mengganti password via aplikasi POKA'),
+          content: Text('Untuk mengganti password melalui aplikasi POKA'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -164,15 +164,22 @@ class _LoginPageState extends State<LoginPage>
                   width: double.infinity,
                   height: 300,
                   decoration: BoxDecoration(
-                    color: Color(0xFF001932), // Changed to primary color
-                    borderRadius: BorderRadius.only(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/batik.jpg'),
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        Color(0xFF001932).withOpacity(0.5), // bisa sesuaikan transparansinya
+                        BlendMode.srcOver,
+                      ),
+                    ),
+                    borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(30),
                       bottomRight: Radius.circular(30),
                     ),
                   ),
                   child: Stack(
                     children: [
-                      // Background elements
+                      // Corak latar transparan (hiasan)
                       Positioned(
                         top: 40,
                         left: 20,
@@ -197,29 +204,38 @@ class _LoginPageState extends State<LoginPage>
                           ),
                         ),
                       ),
+                      Positioned(
+                        bottom: 40,
+                        left: 50,
+                        child: Container(
+                          width: 80,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
 
                       // Main illustration
                       Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Person sitting with laptop
+                            // Image / Illustration
                             Container(
                               width: 200,
                               height: 150,
-                              child: Stack(
-                                children: [
-                                  Image.asset(
-                      'assets/images/splash.png',
-                      width: 200,
-                      height: 200,
-                      fit: BoxFit.contain,
-                    ),
-                                ],
+                              child: Image.asset(
+                                'assets/images/splash.png',
+                                width: 200,
+                                height: 200,
+                                fit: BoxFit.contain,
                               ),
                             ),
-                            SizedBox(height: 20),
-                            // Text(
+                            const SizedBox(height: 20),
+                            // Optional Title
+                            // const Text(
                             //   'PlannER (Planning E-Report)',
                             //   style: TextStyle(
                             //     color: Colors.white,
@@ -234,6 +250,7 @@ class _LoginPageState extends State<LoginPage>
                     ],
                   ),
                 ),
+
 
                 SizedBox(height: 40),
 

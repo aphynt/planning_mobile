@@ -164,12 +164,12 @@ class _KllhListPageState extends State<KllhListPage>
           'Accept': 'application/pdf',
           'Authorization': 'Bearer $token',
         },
-      );
+      ).timeout(Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         // Save the PDF file
         final directory = await getApplicationDocumentsDirectory();
-        final filePath = '${directory.path}/fuel_station_$id.pdf';
+        final filePath = '${directory.path}/KLKH Fuel Station_$id.pdf';
         final file = File(filePath);
         await file.writeAsBytes(response.bodyBytes);
 
