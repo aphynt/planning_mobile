@@ -1,16 +1,16 @@
 part of '../../pages.dart';
 
-class ShowPage extends StatefulWidget {
+class KLKHFuelStationShowPage extends StatefulWidget {
   final String id;
   
 
-  const ShowPage({Key? key, required this.id}) : super(key: key);
+  const KLKHFuelStationShowPage({Key? key, required this.id}) : super(key: key);
 
   @override
-  State<ShowPage> createState() => _ShowPageState();
+  State<KLKHFuelStationShowPage> createState() => _KLKHFuelStationShowPageState();
 }
 
-class _ShowPageState extends State<ShowPage> {
+class _KLKHFuelStationShowPageState extends State<KLKHFuelStationShowPage> {
   Map<String, dynamic>? detailData;
   bool isLoading = true;
   String? currentNik;
@@ -251,7 +251,9 @@ class _ShowPageState extends State<ShowPage> {
                             ListView(
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
-                              children: category.value.map((item) {
+                              children: category.value.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                final item = entry.value;
                                 final key = item['key']!;
                                 final value = detailData![key]; // nilai: 'true', 'false', atau 'n/a'
                                 final noteKey = key.replaceFirst('_CHECK', '_NOTE');
@@ -270,25 +272,35 @@ class _ShowPageState extends State<ShowPage> {
                                     displayText = 'N/A';
                                 }
 
-                                return Card(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                  elevation: 2,
+                                // Tentukan warna berdasarkan index
+                                final backgroundColor = index % 2 == 0 ? Colors.white : const Color.fromARGB(255, 240, 239, 239);
+
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    color: backgroundColor,
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black12,
+                                        blurRadius: 2,
+                                        offset: Offset(0, 1),
+                                      )
+                                    ],
+                                  ),
                                   margin: const EdgeInsets.symmetric(vertical: 6),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(item['label']!, style: TextStyle(fontWeight: FontWeight.w600)),
-                                        SizedBox(height: 4),
-                                        Text('Checklist: $displayText', style: TextStyle(fontSize: 13)),
-                                        if (note != null && note.toString().trim().isNotEmpty) ...[
-                                          SizedBox(height: 6),
-                                          Text('Catatan:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
-                                          Text(note.toString(), style: TextStyle(fontSize: 13, color: Colors.grey[800])),
-                                        ],
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(item['label']!, style: TextStyle(fontWeight: FontWeight.w600)),
+                                      SizedBox(height: 4),
+                                      Text('Checklist: $displayText', style: TextStyle(fontSize: 13)),
+                                      if (note != null && note.toString().trim().isNotEmpty) ...[
+                                        SizedBox(height: 6),
+                                        Text('Catatan:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+                                        Text(note.toString(), style: TextStyle(fontSize: 13, color: Colors.grey[800])),
                                       ],
-                                    ),
+                                    ],
                                   ),
                                 );
                               }).toList(),
@@ -296,8 +308,9 @@ class _ShowPageState extends State<ShowPage> {
                             SizedBox(height: 16),
                           ],
                         );
+                      }
 
-                      }).toList(),
+                      ).toList(),
 
                       
 

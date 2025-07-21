@@ -385,7 +385,7 @@ class _MainPageState extends State<MainPage> {
             borderRadius: BorderRadius.circular(15),
           ),
           title: Text('Info'),
-          content: Text('Coming Soon!'),
+          content: Text('Fitur ini belum difungsikan!'),
           actions: <Widget>[
             TextButton(
               child: Text('Tutup'),
@@ -669,7 +669,7 @@ class _MainPageState extends State<MainPage> {
         return AktivitasPage(); // Sudah ada
       case 2:
         Future.microtask(() => _showComingSoonDialog());
-        return _buildBlankPage(); // agar tetap render sesuatu
+        return _buildComingSoonPage(); // agar tetap render sesuatu
       case 3:
       case 4:
         return _buildComingSoonPage();
@@ -871,12 +871,13 @@ class _MainPageState extends State<MainPage> {
                         _buildQuickAction('KKH', Icons.engineering, () {
                           _showComingSoonDialog();
                         }),
-                        _buildQuickAction('FuelMan', Icons.local_gas_station, () {
-                          _showComingSoonDialog();
-                        }),
                         _buildQuickAction('P2H', Icons.assignment, () {
                           _showComingSoonDialog();
                         }),
+                        _buildQuickAction('FuelMan', Icons.local_gas_station, () {
+                          _showComingSoonDialog();
+                        }),
+                        
                       ],
                     ),
                   ),

@@ -1,11 +1,11 @@
 part of '../../pages.dart';
 
-class FuelStationPage extends StatefulWidget {
+class KLKHFuelStationInsertPage extends StatefulWidget {
   @override
-  _FuelStationPageState createState() => _FuelStationPageState();
+  _KLKHFuelStationInsertPageState createState() => _KLKHFuelStationInsertPageState();
 }
 
-class _FuelStationPageState extends State<FuelStationPage>
+class _KLKHFuelStationInsertPageState extends State<KLKHFuelStationInsertPage>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;

@@ -309,7 +309,7 @@ class _KllhListPageState extends State<KllhListPage>
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ShowPage(id: item['ID'].toString()),
+            builder: (context) => KLKHFuelStationShowPage(id: item['ID'].toString()),
           ),
         );
       },
@@ -569,11 +569,11 @@ class _KllhListPageState extends State<KllhListPage>
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => FuelStationPage(),
+              builder: (context) => KLKHFuelStationInsertPage(),
             ),
           ).then((_) => _fetchFuelStationData());
         },
-        backgroundColor: Color(0xFF001932),
+        backgroundColor: Color(0xFF198754),
         child: Icon(Icons.add, color: Colors.white),
       ),
     );
