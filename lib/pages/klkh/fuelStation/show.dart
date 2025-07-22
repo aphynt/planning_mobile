@@ -18,14 +18,21 @@ class _KLKHFuelStationShowPageState extends State<KLKHFuelStationShowPage> {
   void initState() {
     super.initState();
     fetchDetail();
+    _loadUserData();
   }
 
-  Future<void> _loadUserNik() async {
+  dynamic user = {};
+
+  Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      currentNik = prefs.getString('nik'); 
-    });
+    final userData = prefs.getString(SharedPrefKeys.user);
+    if (userData != null) {
+      setState(() {
+        user = json.decode(userData);
+      });
+    }
   }
+
 
   Future<void> fetchDetail() async {
     try {
@@ -352,7 +359,7 @@ class _KLKHFuelStationShowPageState extends State<KLKHFuelStationShowPage> {
                             ),
                           ],
                         )
-                      : detailData!['DIKETAHUI'] == currentNik
+                      : detailData!['DIKETAHUI'] == user['nik']
                           ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
