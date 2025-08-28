@@ -26,6 +26,7 @@ part 'login_page.dart';
 part 'main_page.dart';
 part 'klkh/fuelStation/index.dart';
 part 'klkh/fuelStation/insert.dart';
+part 'klkh/fuelStation/edit.dart';
 part 'klkh/fuelStation/show.dart';
 part 'aktivitas_page.dart';
 

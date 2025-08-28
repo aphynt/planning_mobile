@@ -59,6 +59,8 @@ class _KllhListPageState extends State<KllhListPage>
     super.dispose();
   }
 
+  dynamic user = {};
+
   Future<void> _fetchFuelStationData() async {
     setState(() {
       isLoading = true;
@@ -66,7 +68,14 @@ class _KllhListPageState extends State<KllhListPage>
 
     try {
       final prefs = await SharedPreferences.getInstance();
+      final userData = prefs.getString(SharedPrefKeys.user);
       final token = prefs.getString(SharedPrefKeys.token);
+
+      if (userData != null) {
+        setState(() {
+          user = json.decode(userData);
+        });
+      }
 
       final formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
       final formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate);
@@ -226,11 +235,17 @@ class _KllhListPageState extends State<KllhListPage>
         showSuccessDialog('Data berhasil dihapus');
         _fetchFuelStationData();
       } else {
-        throw Exception('Failed to delete data');
+        final errorData = jsonDecode(response.body);
+
+        final errorMessage = errorData['message'] ?? 'Terjadi kesalahan';
+        // final errorDetail = errorData['error'] ?? '';
+
+        throw Exception('$errorMessage');
       }
-    } catch (e) {
+    } catch (e, stacktrace) {
       print('Error deleting data: $e');
-      showErrorDialog('Gagal menghapus data: $e');
+      print('Stacktrace: $stacktrace');
+      showErrorDialog('Gagal menghapus data:\n$e');
     }
   }
 
@@ -384,6 +399,11 @@ class _KllhListPageState extends State<KllhListPage>
                         ),
                         SizedBox(height: 3),
                         Text(
+                          'PIC: ${item['NAMA_PIC'] ?? '-'}',
+                          style: TextStyle(fontSize: 13, color: Colors.white),
+                        ),
+                        SizedBox(height: 3),
+                        Text(
                           'Diketahui: ${item['NAMA_DIKETAHUI'] ?? '-'}',
                           style: TextStyle(fontSize: 13, color: Colors.white),
                         ),
@@ -391,8 +411,9 @@ class _KllhListPageState extends State<KllhListPage>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
+                            // Tombol download
                             Padding(
-                              padding: EdgeInsets.only(right: 20), // Jarak kanan dari tombol pertama
+                              padding: EdgeInsets.only(right: 20), // jarak kanan dari download
                               child: IconButton(
                                 icon: Icon(Icons.download, color: Colors.white),
                                 iconSize: 20,
@@ -401,13 +422,43 @@ class _KllhListPageState extends State<KllhListPage>
                                 onPressed: () => _downloadPdf(item['ID'].toString()),
                               ),
                             ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              iconSize: 20,
-                              padding: EdgeInsets.zero,
-                              constraints: BoxConstraints(),
-                              onPressed: () => _deleteItem(item['ID'].toString()),
-                            ),
+
+                            // Tombol edit (kalau belum diverifikasi)
+                            if (item['NIK_PIC'] == user['nik'] && item['VERIFIED_DIKETAHUI'] == null) ...[
+                              IconButton(
+                                icon: Icon(Icons.edit, color: Colors.orange),
+                                iconSize: 20,
+                                padding: EdgeInsets.zero,
+                                constraints: BoxConstraints(),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => KLKHFuelStationEditPage(
+                                        id: item['ID'].toString(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              SizedBox(width: 20), // jarak antar tombol
+                            ],
+
+
+                            // Tombol delete (role tertentu atau pembuat sebelum verifikasi)
+                            if (
+                              user['role'] == 'STAFF' || 
+                              user['role'] == 'PJS. SUPERINTENDENT' || 
+                              user['role'] == 'SUPERINTENDENT' || 
+                              (item['NIK_PIC'] == user['nik'] && item['VERIFIED_DIKETAHUI'] == null)
+                            )
+                              IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                iconSize: 20,
+                                padding: EdgeInsets.zero,
+                                constraints: BoxConstraints(),
+                                onPressed: () => _deleteItem(item['ID'].toString()),
+                              ),
                           ],
                         ),
                       ],
