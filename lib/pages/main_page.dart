@@ -424,7 +424,7 @@ class _MainPageState extends State<MainPage> {
                 ),
               ),
               SizedBox(height: 4),
-              Text('Versi 1.0.0'),
+              Text('Versi 1.0.1'),
               SizedBox(height: 8),
               Text(
                 'Planning E-Report',
