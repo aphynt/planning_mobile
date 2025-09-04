@@ -98,7 +98,7 @@ class _KllhListPageState extends State<KllhListPage>
           'Authorization': 'Bearer $token',
         },
       );
-      print(response.body);
+      // print(response.body);
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -497,7 +497,7 @@ class _KllhListPageState extends State<KllhListPage>
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: Text('Daftar Checklist Fuel Station',
+        title: Text('Daftar KLKH Fuel Station',
             style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Color(0xFF001932),
         foregroundColor: Colors.white,
