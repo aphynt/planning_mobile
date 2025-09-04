@@ -52,8 +52,6 @@ class _MyAppState extends State<MyApp> {
     _setupFCM();
   }
 
-  
-
   Future<void> _setupFCM() async {
     // Minta izin notifikasi
     NotificationSettings settings =

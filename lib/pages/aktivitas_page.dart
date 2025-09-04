@@ -6,9 +6,12 @@ class AktivitasPage extends StatefulWidget {
 }
 
 class _AktivitasPageState extends State<AktivitasPage>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late AnimationController _opacityController;
+  late Animation<double> _opacityAnimation;
+
   bool isLoading = false;
   List<Map<String, dynamic>> aktivitasList = [];
   List<Map<String, dynamic>> filteredList = [];
@@ -48,6 +51,13 @@ class _AktivitasPageState extends State<AktivitasPage>
       curve: Curves.easeInOut,
     ));
     _animationController.forward();
+    _opacityController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1000), // 1 detik naik turun
+    )..repeat(reverse: true);
+    _opacityAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _opacityController, curve: Curves.easeInOut),
+    );
 
     _fetchAktivitasData();
   }
@@ -187,8 +197,8 @@ class _AktivitasPageState extends State<AktivitasPage>
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: (item['STATUSENABLED'] == "1") 
-                        ? Colors.green 
+                    color: (item['STATUSENABLED'] == "1")
+                        ? Colors.green
                         : Colors.red,
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -302,10 +312,11 @@ class _AktivitasPageState extends State<AktivitasPage>
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFF001932), width: 1.5),
+                        borderSide:
+                            BorderSide(color: Color(0xFF001932), width: 1.5),
                       ),
-                      contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                     onChanged: _filterData,
                   ),
@@ -342,9 +353,9 @@ class _AktivitasPageState extends State<AktivitasPage>
             Expanded(
               child: isLoading
                   ? Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFF001932)),
+                      child: Image.asset(
+                        'assets/images/spinning-loading.gif',
+                        width: 200,
                       ),
                     )
                   : filteredList.isEmpty

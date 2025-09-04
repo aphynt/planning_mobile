@@ -1,15 +1,16 @@
 part of '../../pages.dart';
 
-
 class KllhListPage extends StatefulWidget {
   @override
   _KllhListPageState createState() => _KllhListPageState();
 }
 
 class _KllhListPageState extends State<KllhListPage>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late AnimationController _opacityController;
+  late Animation<double> _opacityAnimation;
   bool isLoading = false;
   List<Map<String, dynamic>> fuelStationList = [];
   List<Map<String, dynamic>> filteredList = [];
@@ -35,6 +36,14 @@ class _KllhListPageState extends State<KllhListPage>
     ));
     _animationController.forward();
 
+    _opacityController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1000), // 1 detik naik turun
+    )..repeat(reverse: true);
+    _opacityAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _opacityController, curve: Curves.easeInOut),
+    );
+
     _fetchFuelStationData();
   }
 
@@ -55,6 +64,7 @@ class _KllhListPageState extends State<KllhListPage>
   @override
   void dispose() {
     _animationController.dispose();
+    _opacityController.dispose();
     searchController.dispose();
     super.dispose();
   }
@@ -88,6 +98,7 @@ class _KllhListPageState extends State<KllhListPage>
           'Authorization': 'Bearer $token',
         },
       );
+      print(response.body);
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -141,7 +152,7 @@ class _KllhListPageState extends State<KllhListPage>
       });
     }
   }
-  
+
   Future<void> _downloadPdf(String id) async {
     bool confirm = await showDialog(
       context: context,
@@ -155,7 +166,8 @@ class _KllhListPageState extends State<KllhListPage>
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Download', style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0))),
+            child: Text('Download',
+                style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0))),
           ),
         ],
       ),
@@ -252,7 +264,8 @@ class _KllhListPageState extends State<KllhListPage>
   void _filterData(String query) {
     setState(() {
       filteredList = fuelStationList.where((item) {
-        final namaDiketahuiSearch = item['NAMA_DIKETAHUI']?.toString().toLowerCase() ?? '';
+        final namaDiketahuiSearch =
+            item['NAMA_DIKETAHUI']?.toString().toLowerCase() ?? '';
         final shiftSearch = item['SHIFT']?.toString().toLowerCase() ?? '';
         final pitSearch = item['PIT']?.toString().toLowerCase() ?? '';
         final searchLower = query.toLowerCase();
@@ -324,7 +337,8 @@ class _KllhListPageState extends State<KllhListPage>
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => KLKHFuelStationShowPage(id: item['ID'].toString()),
+            builder: (context) =>
+                KLKHFuelStationShowPage(id: item['ID'].toString()),
           ),
         );
       },
@@ -351,7 +365,8 @@ class _KllhListPageState extends State<KllhListPage>
                     border: Border.all(color: Colors.white.withOpacity(0.2)),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -368,7 +383,8 @@ class _KllhListPageState extends State<KllhListPage>
                               ),
                             ),
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: item['VERIFIED_DIKETAHUI'] == null
                                     ? Colors.red
@@ -413,18 +429,21 @@ class _KllhListPageState extends State<KllhListPage>
                           children: [
                             // Tombol download
                             Padding(
-                              padding: EdgeInsets.only(right: 20), // jarak kanan dari download
+                              padding: EdgeInsets.only(
+                                  right: 20), // jarak kanan dari download
                               child: IconButton(
                                 icon: Icon(Icons.download, color: Colors.white),
                                 iconSize: 20,
                                 padding: EdgeInsets.zero,
                                 constraints: BoxConstraints(),
-                                onPressed: () => _downloadPdf(item['ID'].toString()),
+                                onPressed: () =>
+                                    _downloadPdf(item['ID'].toString()),
                               ),
                             ),
 
                             // Tombol edit (kalau belum diverifikasi)
-                            if (item['NIK_PIC'] == user['nik'] && item['VERIFIED_DIKETAHUI'] == null) ...[
+                            if (item['NIK_PIC'] == user['nik'] &&
+                                item['VERIFIED_DIKETAHUI'] == null) ...[
                               IconButton(
                                 icon: Icon(Icons.edit, color: Colors.orange),
                                 iconSize: 20,
@@ -434,7 +453,8 @@ class _KllhListPageState extends State<KllhListPage>
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => KLKHFuelStationEditPage(
+                                      builder: (context) =>
+                                          KLKHFuelStationEditPage(
                                         id: item['ID'].toString(),
                                       ),
                                     ),
@@ -444,20 +464,19 @@ class _KllhListPageState extends State<KllhListPage>
                               SizedBox(width: 20), // jarak antar tombol
                             ],
 
-
                             // Tombol delete (role tertentu atau pembuat sebelum verifikasi)
-                            if (
-                              user['role'] == 'STAFF' || 
-                              user['role'] == 'PJS. SUPERINTENDENT' || 
-                              user['role'] == 'SUPERINTENDENT' || 
-                              (item['NIK_PIC'] == user['nik'] && item['VERIFIED_DIKETAHUI'] == null)
-                            )
+                            if (user['role'] == 'STAFF' ||
+                                user['role'] == 'PJS. SUPERINTENDENT' ||
+                                user['role'] == 'SUPERINTENDENT' ||
+                                (item['NIK_PIC'] == user['nik'] &&
+                                    item['VERIFIED_DIKETAHUI'] == null))
                               IconButton(
                                 icon: Icon(Icons.delete, color: Colors.red),
                                 iconSize: 20,
                                 padding: EdgeInsets.zero,
                                 constraints: BoxConstraints(),
-                                onPressed: () => _deleteItem(item['ID'].toString()),
+                                onPressed: () =>
+                                    _deleteItem(item['ID'].toString()),
                               ),
                           ],
                         ),
@@ -472,12 +491,6 @@ class _KllhListPageState extends State<KllhListPage>
       ),
     );
   }
-
-
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -588,9 +601,9 @@ class _KllhListPageState extends State<KllhListPage>
             Expanded(
               child: isLoading
                   ? Center(
-                      child: CircularProgressIndicator(
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Color(0xFF001932)),
+                      child: Image.asset(
+                        'assets/images/spinning-loading.gif',
+                        width: 200,
                       ),
                     )
                   : filteredList.isEmpty

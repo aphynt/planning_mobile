@@ -1,6 +1,5 @@
 part of 'pages.dart';
 
-
 class Banner {
   final String filename;
   final String url;
@@ -67,7 +66,6 @@ class ActivitySummary {
   }
 }
 
-
 Future<List<Banner>> fetchBanners() async {
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString(SharedPrefKeys.token);
@@ -117,7 +115,9 @@ Future<AbsensiData?> fetchAbsensiData() async {
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       print(jsonResponse);
-      if (jsonResponse['status'] == 'success' && jsonResponse['data'] != null && jsonResponse['data'].isNotEmpty) {
+      if (jsonResponse['status'] == 'success' &&
+          jsonResponse['data'] != null &&
+          jsonResponse['data'].isNotEmpty) {
         return AbsensiData.fromJson(jsonResponse['data'][0]);
       }
     }
@@ -131,10 +131,10 @@ String formatDateString(String originalDate) {
   try {
     // Parse string ke DateTime
     DateTime dateTime = DateTime.parse(originalDate);
-    
+
     // Format ke format yang diinginkan: dd-MM-yyyy HH:mm
     String formattedDate = DateFormat('dd-MM-yyyy HH:mm').format(dateTime);
-    
+
     return formattedDate;
   } catch (e) {
     print('Error parsing date: $e');
@@ -160,7 +160,9 @@ Future<List<ActivitySummary>> fetchActivitySummary() async {
       final jsonResponse = json.decode(response.body);
       if (jsonResponse['status'] == 'success' && jsonResponse['data'] != null) {
         final List<dynamic> activityData = jsonResponse['data'];
-        return activityData.map((activity) => ActivitySummary.fromJson(activity)).toList();
+        return activityData
+            .map((activity) => ActivitySummary.fromJson(activity))
+            .toList();
       }
     }
   } catch (e) {
@@ -180,6 +182,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
+  int unreadCount = 0;
   final Color primaryColor = const Color(0xFF001932);
   final Color accentColor = const Color(0xFF00C2FF);
 
@@ -258,14 +261,39 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  Future<void> _fetchUnreadCount() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString(SharedPrefKeys.token);
+
+      final response = await http.get(
+        Uri.parse('${baseUrl}/api/notification'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final list = List<Map<String, dynamic>>.from(data['data']);
+        setState(() {
+          unreadCount = list.where((n) => n['READ'] == "0").length;
+        });
+      }
+    } catch (e) {
+      print("Error fetch unread: $e");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _fetchUnreadCount();
     _loadUserData();
     _loadAbsensiData();
     _loadActivitySummary();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -274,27 +302,27 @@ class _MainPageState extends State<MainPage> {
 
     return Scaffold(
       body: Stack(
-      children: [
-        // Gambar latar belakang dengan opacity
-        Opacity(
-          opacity: 0.2,
-          child: Image.asset(
-            'assets/images/background2.jpg', // Ganti sesuai path gambar kamu
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            errorBuilder: (context, error, stackTrace) {
-              return Center(child: Text('Image not found'));
-            },
+        children: [
+          // Gambar latar belakang dengan opacity
+          Opacity(
+            opacity: 0.2,
+            child: Image.asset(
+              'assets/images/background2.jpg', // Ganti sesuai path gambar kamu
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              errorBuilder: (context, error, stackTrace) {
+                return Center(child: Text('Image not found'));
+              },
+            ),
           ),
-        ),
 
-        // Konten utama di atas background
-        Positioned.fill(
-          child: _buildBodyContent(),
-        ),
-      ],
-    ),
+          // Konten utama di atas background
+          Positioned.fill(
+            child: _buildBodyContent(),
+          ),
+        ],
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -448,7 +476,6 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-
   Widget _buildQuickAction(String label, IconData icon, onTap) {
     return Column(
       children: [
@@ -489,11 +516,10 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-
   Widget _buildActivityItem(ActivitySummary activity) {
     IconData activityIcon;
     Color activityColor;
-    
+
     // Set icon dan warna berdasarkan jenis kegiatan
     switch (activity.jenis.toLowerCase()) {
       case 'kegiatan':
@@ -585,7 +611,7 @@ class _MainPageState extends State<MainPage> {
             width: 8,
             height: 8,
             decoration: BoxDecoration(
-              color: activity.statusEnabled=="1" ? Colors.green : Colors.red,
+              color: activity.statusEnabled == "1" ? Colors.green : Colors.red,
               shape: BoxShape.circle,
             ),
           ),
@@ -651,15 +677,26 @@ class _MainPageState extends State<MainPage> {
         return 'Kemarin';
       } else {
         // Format: 13 Jul 2025
-        final months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 
-                       'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        final months = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'Mei',
+          'Jun',
+          'Jul',
+          'Agu',
+          'Sep',
+          'Okt',
+          'Nov',
+          'Des'
+        ];
         return '${date.day} ${months[date.month - 1]} ${date.year}';
       }
     } catch (e) {
       return dateString;
     }
   }
-
 
   Widget _buildBodyContent() {
     switch (_selectedIndex) {
@@ -692,166 +729,212 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget _buildHomePage() {
-  final screenHeight = MediaQuery.of(context).size.height;
-  final isSmallScreen = screenHeight < 700;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenHeight < 700;
 
-  return LayoutBuilder(
-    builder: (context, constraints) {
-      return SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: constraints.maxHeight,
-          ),
-          child: Column(
-            children: [
-              // Header dengan background image (tinggi disesuaikan)
-                  Container(
-                    height: isSmallScreen ? 220 : 270,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [primaryColor, const Color(0xFF003366)],
-                      ),
-                      borderRadius: const BorderRadius.vertical(
-                        bottom: Radius.circular(20),
-                      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight,
+            ),
+            child: Column(
+              children: [
+                // Header dengan background image (tinggi disesuaikan)
+                Container(
+                  height: isSmallScreen ? 220 : 270,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [primaryColor, const Color(0xFF003366)],
                     ),
-                    child: Stack(
-                      children: [
-                        // Background image
-                        Positioned.fill(
-                          child: Opacity(
-                            opacity: 0.2, 
-                            child: Image.asset(
-                              'assets/images/gali2.jpg',
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Center(child: Text('Image not found'));
-                              },
-                            ),
-                          ),
-                        ),
-                        SafeArea(
-                          child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              children: [
-                                // AppBar content
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    
-                                    Text(
-                                      'Hi, ${user['name'] ?? 'User'}!',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.emoji_emotions,
-                                      color: Color(0xFF198754), // Bootstrap 'success' green
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Row(
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(
-                                              Icons.notifications_outlined,
-                                              color: Colors.white),
-                                          onPressed: () {},
-                                        ),
-                                        PopupMenuButton<int>(
-                                          icon: const Icon(Icons.more_vert,
-                                              color: Colors.white),
-                                          onSelected: (value) {
-                                            if (value == 1) {
-                                              _showAboutDialog();
-                                            } else if (value == 2) {
-                                              logout(); // pastikan logout tidak butuh await di sini
-                                            }
-                                          },
-                                          itemBuilder: (context) => [
-                                            const PopupMenuItem(
-                                              value: 1,
-                                              child: Text("Tentang Aplikasi"),
-                                            ),
-                                            const PopupMenuItem(
-                                              value: 2,
-                                              child: Text("Keluar"),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                // Balance Card
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.3),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.access_time,
-                                              color: Colors.white70),
-                                          const SizedBox(width: 5),
-                                          Text(
-                                            'Kehadiran Hari Ini',
-                                            style: TextStyle(
-                                              color:
-                                                  Colors.white.withOpacity(0.9),
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 5),
-                                      if (absensiData != null) ...[
-                                        _buildAttendanceInfo('Kode', absensiData!.code),
-                                        const SizedBox(height: 5),
-                                        _buildAttendanceInfo('Masuk', formatDateString(absensiData!.masuk)),
-                                        const SizedBox(height: 5),
-                                        _buildAttendanceInfo('Pulang', formatDateString(absensiData!.pulang)),
-                                      ] else ...[
-                                        _buildAttendanceInfo('Kode', '-'),
-                                        const SizedBox(height: 5),
-                                        _buildAttendanceInfo('Masuk', '-'),
-                                        const SizedBox(height: 5),
-                                        _buildAttendanceInfo('Pulang', '-'),
-                                      ],
-                                    ],
-                                  ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(20),
                     ),
                   ),
+                  child: Stack(
+                    children: [
+                      // Background image
+                      Positioned.fill(
+                        child: Opacity(
+                          opacity: 0.2,
+                          child: Image.asset(
+                            'assets/images/gali2.jpg',
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Center(child: Text('Image not found'));
+                            },
+                          ),
+                        ),
+                      ),
+                      SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              // AppBar content
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Hi, ${user['name'] ?? 'User'}!',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.emoji_emotions,
+                                    color: Color(
+                                        0xFF198754), // Bootstrap 'success' green
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Row(
+                                    children: [
+                                      Stack(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.notifications_outlined,
+                                              color: Colors.white,
+                                            ),
+                                            onPressed: () async {
+                                              await Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      NotifikasiPage(),
+                                                ),
+                                              );
+                                              // setelah balik dari NotifikasiPage, refresh badge
+                                              _fetchUnreadCount();
+                                            },
+                                          ),
+                                          if (unreadCount > 0)
+                                            Positioned(
+                                              right: 6,
+                                              top: 6,
+                                              child: Container(
+                                                padding: EdgeInsets.all(4),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.red,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                constraints: BoxConstraints(
+                                                  minWidth: 18,
+                                                  minHeight: 18,
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    '$unreadCount',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      PopupMenuButton<int>(
+                                        icon: const Icon(Icons.more_vert,
+                                            color: Colors.white),
+                                        onSelected: (value) {
+                                          if (value == 1) {
+                                            _showAboutDialog();
+                                          } else if (value == 2) {
+                                            logout(); // pastikan logout tidak butuh await di sini
+                                          }
+                                        },
+                                        itemBuilder: (context) => [
+                                          const PopupMenuItem(
+                                            value: 1,
+                                            child: Text("Tentang Aplikasi"),
+                                          ),
+                                          const PopupMenuItem(
+                                            value: 2,
+                                            child: Text("Keluar"),
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              // Balance Card
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.access_time,
+                                            color: Colors.white70),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          'Kehadiran Hari Ini',
+                                          style: TextStyle(
+                                            color:
+                                                Colors.white.withOpacity(0.9),
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    if (absensiData != null) ...[
+                                      _buildAttendanceInfo(
+                                          'Kode', absensiData!.code),
+                                      const SizedBox(height: 5),
+                                      _buildAttendanceInfo('Masuk',
+                                          formatDateString(absensiData!.masuk)),
+                                      const SizedBox(height: 5),
+                                      _buildAttendanceInfo(
+                                          'Pulang',
+                                          formatDateString(
+                                              absensiData!.pulang)),
+                                    ] else ...[
+                                      _buildAttendanceInfo('Kode', '-'),
+                                      const SizedBox(height: 5),
+                                      _buildAttendanceInfo('Masuk', '-'),
+                                      const SizedBox(height: 5),
+                                      _buildAttendanceInfo('Pulang', '-'),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-                  // Quick Actions Grid (dengan tinggi dinamis)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 15),
-                    child: SizedBox(
+                // Quick Actions Grid (dengan tinggi dinamis)
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                  child: SizedBox(
                     height: isSmallScreen ? 180 : 220,
                     child: GridView.count(
                       crossAxisCount: 4,
@@ -860,7 +943,9 @@ class _MainPageState extends State<MainPage> {
                       crossAxisSpacing: 12,
                       childAspectRatio: 0.9,
                       children: [
-                        _buildQuickAction('KLKH Fuel Station', Icons.assignment_turned_in, () {
+                        _buildQuickAction(
+                            'KLKH Fuel Station', Icons.assignment_turned_in,
+                            () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -874,162 +959,158 @@ class _MainPageState extends State<MainPage> {
                         _buildQuickAction('P2H', Icons.assignment, () {
                           _showComingSoonDialog();
                         }),
-                        _buildQuickAction('FuelMan', Icons.local_gas_station, () {
+                        _buildQuickAction('FuelMan', Icons.local_gas_station,
+                            () {
                           _showComingSoonDialog();
                         }),
-                        
                       ],
                     ),
                   ),
-                  ),
+                ),
 
-                  // Promo Banner (dengan tinggi lebih kecil untuk layar kecil)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: FutureBuilder<List<Banner>>(
-                      future: fetchBanners(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return SizedBox(
-                            height: isSmallScreen ? 120 : 150,
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        } else if (snapshot.hasError) {
-                          return SizedBox(
-                            height: isSmallScreen ? 120 : 150,
-                            child: Center(child: Text('Gagal memuat banner')),
-                          );
-                        } else if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
-                          return SizedBox(
-                            height: isSmallScreen ? 120 : 150,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    accentColor,
-                                    const Color(0xFF0095E0)
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Tidak ada banner tersedia',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-
-                        final banners = snapshot.data!;
+                // Promo Banner (dengan tinggi lebih kecil untuk layar kecil)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: FutureBuilder<List<Banner>>(
+                    future: fetchBanners(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
                         return SizedBox(
-                          height: isSmallScreen ? 160 : 200,
-                          child: CarouselSlider.builder(
-                            itemCount: banners.length,
-                            options: CarouselOptions(
-                              autoPlay: true,
-                              enlargeCenterPage: true,
-                              aspectRatio: isSmallScreen ? 2.0 : 2.5,
-                              autoPlayInterval: Duration(seconds: 3),
-                              viewportFraction: 1.0,
+                          height: isSmallScreen ? 120 : 150,
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      } else if (snapshot.hasError) {
+                        return SizedBox(
+                          height: isSmallScreen ? 120 : 150,
+                          child: Center(child: Text('Gagal memuat banner')),
+                        );
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return SizedBox(
+                          height: isSmallScreen ? 120 : 150,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [accentColor, const Color(0xFF0095E0)],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                            itemBuilder: (context, index, realIdx) {
-                              return Container(
-                                margin: EdgeInsets.symmetric(horizontal: 2),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 6,
-                                      offset: Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: CachedNetworkImage(
-                                    imageUrl: banners[index].url,
-                                    httpHeaders: {
-                                      'Accept': 'image/*',
-                                    },
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    placeholder: (context, url) => Container(
-                                      color: Colors.grey[200],
-                                      child: Center(
-                                          child: CircularProgressIndicator()),
-                                    ),
-                                    errorWidget: (context, url, error) =>
-                                        Container(
-                                      color: Colors.grey[200],
-                                      child: Icon(Icons.error),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
+                            child: Center(
+                              child: Text(
+                                'Tidak ada banner tersedia',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
                           ),
                         );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 15),
+                      }
 
-                  // Recent Transactions Section (dengan jumlah item dinamis)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Aktivitas Terakhir',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: primaryColor,
+                      final banners = snapshot.data!;
+                      return SizedBox(
+                        height: isSmallScreen ? 160 : 200,
+                        child: CarouselSlider.builder(
+                          itemCount: banners.length,
+                          options: CarouselOptions(
+                            autoPlay: true,
+                            enlargeCenterPage: true,
+                            aspectRatio: isSmallScreen ? 2.0 : 2.5,
+                            autoPlayInterval: Duration(seconds: 3),
+                            viewportFraction: 1.0,
+                          ),
+                          itemBuilder: (context, index, realIdx) {
+                            return Container(
+                              margin: EdgeInsets.symmetric(horizontal: 2),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 6,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ],
                               ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                MaterialPageRoute(builder: (context) => AktivitasPage()),
-                                );
-                              },
-                              child: Text(
-                                'Lihat Semua',
-                                style: TextStyle(color: accentColor),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: CachedNetworkImage(
+                                  imageUrl: banners[index].url,
+                                  httpHeaders: {
+                                    'Accept': 'image/*',
+                                  },
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  placeholder: (context, url) => Container(
+                                    color: Colors.grey[200],
+                                    child: Center(
+                                        child: CircularProgressIndicator()),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      Container(
+                                    color: Colors.grey[200],
+                                    child: Icon(Icons.error),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
+                            );
+                          },
                         ),
-                        const SizedBox(height: 12),
-                        if (activitySummaries.isNotEmpty) ...[
-                          ...activitySummaries.take(isSmallScreen ? 3 : 4).map((activity) => 
-                            _buildActivityItem(activity)
-                          ).toList(),
-                        ] else ...[
-                          _buildEmptyActivityState(),
-                        ],
-                      ],
-                    ),
+                      );
+                    },
                   ),
+                ),
+                const SizedBox(height: 15),
 
-                  // Bottom padding untuk menghindari overflow
-                  SizedBox(height: isSmallScreen ? 20 : 40),
-            ],
+                // Recent Transactions Section (dengan jumlah item dinamis)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Aktivitas Terakhir',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: primaryColor,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => AktivitasPage()),
+                              );
+                            },
+                            child: Text(
+                              'Lihat Semua',
+                              style: TextStyle(color: accentColor),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (activitySummaries.isNotEmpty) ...[
+                        ...activitySummaries
+                            .take(isSmallScreen ? 3 : 4)
+                            .map((activity) => _buildActivityItem(activity))
+                            .toList(),
+                      ] else ...[
+                        _buildEmptyActivityState(),
+                      ],
+                    ],
+                  ),
+                ),
+
+                // Bottom padding untuk menghindari overflow
+                SizedBox(height: isSmallScreen ? 20 : 40),
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
-
+        );
+      },
+    );
+  }
 }

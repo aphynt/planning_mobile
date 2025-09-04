@@ -1,0 +1,2 @@
+F:/Kerjasama/fastwork/achmadfadillah/planning_mobile/android/app/.cxx/Debug/1t4h2v52/arm64-v8a/CMakeFiles/edit_cache.dir
+F:/Kerjasama/fastwork/achmadfadillah/planning_mobile/android/app/.cxx/Debug/1t4h2v52/arm64-v8a/CMakeFiles/rebuild_cache.dir

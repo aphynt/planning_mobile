@@ -14,6 +14,7 @@ import 'dart:ui' as ui;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:survey/pages/notification_page.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 

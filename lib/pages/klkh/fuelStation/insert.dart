@@ -2,7 +2,8 @@ part of '../../pages.dart';
 
 class KLKHFuelStationInsertPage extends StatefulWidget {
   @override
-  _KLKHFuelStationInsertPageState createState() => _KLKHFuelStationInsertPageState();
+  _KLKHFuelStationInsertPageState createState() =>
+      _KLKHFuelStationInsertPageState();
 }
 
 class _KLKHFuelStationInsertPageState extends State<KLKHFuelStationInsertPage>
@@ -32,37 +33,47 @@ class _KLKHFuelStationInsertPageState extends State<KLKHFuelStationInsertPage>
   String? selectedDiketahuiNik;
 
   // Checklist items with their corresponding note controllers
-final Map<String, Map<String, String>> categorizedChecklistItems = {
+  final Map<String, Map<String, String>> categorizedChecklistItems = {
     'Lokasi Kerja': {
       'PERMUKAAN_TANAH_RATA': 'Permukaan tanah rata dan tidak berlubang',
       'PERMUKAAN_TANAH_LICIN': 'Permukaan tanah tidak licin',
-      'LOKASI_JAUH_LINTASAN': 'Lokasi kerja jauh dengan lintasan aktif angkutan',
+      'LOKASI_JAUH_LINTASAN':
+          'Lokasi kerja jauh dengan lintasan aktif angkutan',
       'TIDAK_CECERAN_B3': 'Tidak ada ceceran B3',
-      'PARKIR_FUELTRUCK': 'Area parkir khusus Fuel Truck untuk penyetokan tersedia',
+      'PARKIR_FUELTRUCK':
+          'Area parkir khusus Fuel Truck untuk penyetokan tersedia',
       'PARKIR_LV': 'Area parkir khusus untuk LV tersedia',
-      'LAMPU_KERJA': 'Semua lampu kerja menyala dengan normal dan memadai untuk kerja malam hari',
+      'LAMPU_KERJA':
+          'Semua lampu kerja menyala dengan normal dan memadai untuk kerja malam hari',
       'FUEL_GENSET': 'Sisa fuel genset >10% kapasitas tangki',
-      'AIR_BERSIH_TANDON': 'Sisa air dalam tandon air bersih >30% kapasitas tandon'
+      'AIR_BERSIH_TANDON':
+          'Sisa air dalam tandon air bersih >30% kapasitas tandon'
     },
     'Perlengkapan Kerja': {
-    'SOP_JSA': 'Tersedia SOP/ JSA untuk pekerjaan yang akan di lakukan',
-    'SAFETY_POST': 'Terpasang safety post sebagai batas berhenti unit untuk refueling',
-    'RAMBU_APD': 'Terpasang rambu peringatan dan rambu APD',
-    'PERLENGKAPAN_KERJA': 'Perlengkapan kerja ditata dengan rapi & tidak berserakan',
-    'APAB_APAR': 'Tersedia APAB dan APAR',
-    'P3K_EYEWASH': 'Tersedia kotak P3K dan Eyewash',
-    'INSPEKSI_APAR': 'Terdapat tag inspeksi APAR dan eyewash yang sudah di inspeksi',
-    'FORM_CHECKLIST_REFUELING': 'Tersedia form checklist peralatan Refueling',
-    'TEMPAT_SAMPAH': 'Tersedia tiga wadah / tempat penampung sampah'
+      'SOP_JSA': 'Tersedia SOP/ JSA untuk pekerjaan yang akan di lakukan',
+      'SAFETY_POST':
+          'Terpasang safety post sebagai batas berhenti unit untuk refueling',
+      'RAMBU_APD': 'Terpasang rambu peringatan dan rambu APD',
+      'PERLENGKAPAN_KERJA':
+          'Perlengkapan kerja ditata dengan rapi & tidak berserakan',
+      'APAB_APAR': 'Tersedia APAB dan APAR',
+      'P3K_EYEWASH': 'Tersedia kotak P3K dan Eyewash',
+      'INSPEKSI_APAR':
+          'Terdapat tag inspeksi APAR dan eyewash yang sudah di inspeksi',
+      'FORM_CHECKLIST_REFUELING': 'Tersedia form checklist peralatan Refueling',
+      'TEMPAT_SAMPAH': 'Tersedia tiga wadah / tempat penampung sampah'
     },
     'Kegiatan Refueling Unit A2B': {
-    'MINEPERMIT': 'Fuelman memiliki dan membawa minepermit sebagai izin kerja',
-    'SIMPER_OPERATOR': 'Operator Fuel Truck memiliki dan membawa SIMPER sesuai peralatan yang digunakan',
-    'PADLOCK': 'Tersedia Padlock untuk kegiatan refueling',
-    'WADAH_PENAMPUNG': 'Tersedia wadah penampung untuk kegiatan Refueling',
-    'WHEEL_CHOCK': 'Tersedia ganjal / Wheel Chock',
-    'RADIO_KOMUNIKASI': 'Tersedia Radio Komunikasi',
-    'APD_STANDAR': 'Pekerja memakai APD standar dan APD tambahan jika di perlukan'
+      'MINEPERMIT':
+          'Fuelman memiliki dan membawa minepermit sebagai izin kerja',
+      'SIMPER_OPERATOR':
+          'Operator Fuel Truck memiliki dan membawa SIMPER sesuai peralatan yang digunakan',
+      'PADLOCK': 'Tersedia Padlock untuk kegiatan refueling',
+      'WADAH_PENAMPUNG': 'Tersedia wadah penampung untuk kegiatan Refueling',
+      'WHEEL_CHOCK': 'Tersedia ganjal / Wheel Chock',
+      'RADIO_KOMUNIKASI': 'Tersedia Radio Komunikasi',
+      'APD_STANDAR':
+          'Pekerja memakai APD standar dan APD tambahan jika di perlukan'
     },
   };
 
@@ -266,6 +277,8 @@ final Map<String, Map<String, String>> categorizedChecklistItems = {
         'ADDITIONAL_NOTES': additionalNotesController.text,
         'DIKETAHUI': selectedDiketahuiNik,
       };
+
+      print("ini request body $requestBody");
 
       // Add checklist items
       categorizedChecklistItems.forEach((category, items) {
@@ -610,13 +623,15 @@ final Map<String, Map<String, String>> categorizedChecklistItems = {
                             },
                             validator: (value) {
                               if (value == null) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
                                   showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
                                       title: Row(
                                         children: [
-                                          Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                                          Icon(Icons.warning_amber_rounded,
+                                              color: Colors.orange),
                                           SizedBox(width: 8),
                                           Text('Peringatan'),
                                         ],
@@ -624,7 +639,8 @@ final Map<String, Map<String, String>> categorizedChecklistItems = {
                                       content: Text('PIT harus dipilih'),
                                       actions: [
                                         TextButton(
-                                          onPressed: () => Navigator.of(context).pop(),
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(),
                                           child: Text('OK'),
                                         ),
                                       ],
@@ -677,13 +693,15 @@ final Map<String, Map<String, String>> categorizedChecklistItems = {
                             },
                             validator: (value) {
                               if (value == null) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
                                   showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
                                       title: Row(
                                         children: [
-                                          Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                                          Icon(Icons.warning_amber_rounded,
+                                              color: Colors.orange),
                                           SizedBox(width: 8),
                                           Text('Peringatan'),
                                         ],
@@ -691,7 +709,8 @@ final Map<String, Map<String, String>> categorizedChecklistItems = {
                                       content: Text('Shift harus dipilih'),
                                       actions: [
                                         TextButton(
-                                          onPressed: () => Navigator.of(context).pop(),
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(),
                                           child: Text('OK'),
                                         ),
                                       ],
@@ -814,7 +833,8 @@ final Map<String, Map<String, String>> categorizedChecklistItems = {
                         ),
                       ),
                     ),
-                    ...items.entries.map((subEntry) => _buildChecklistItem(subEntry.key, subEntry.value))
+                    ...items.entries.map((subEntry) =>
+                        _buildChecklistItem(subEntry.key, subEntry.value))
                   ];
                 }).toList(),
 

@@ -40,6 +40,66 @@ class _LoginPageState extends State<LoginPage>
     super.dispose();
   }
 
+  // Future<void> login() async {
+  //   if (nikController.text.isEmpty || passwordController.text.isEmpty) {
+  //     showErrorDialog('NIK dan Password harus diisi!');
+  //     return;
+  //   }
+
+  //   setState(() {
+  //     isLoading = true;
+  //   });
+
+  //   _loadingTimer = Timer(Duration(seconds: 10), () {
+  //     if (mounted && isLoading) {
+  //       setState(() {
+  //         isLoading = false;
+  //       });
+  //       showErrorDialog('Silakan coba lagi.');
+  //     }
+  //   });
+
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse('${baseUrl}/api/login'),
+  //       headers: {
+  //         'Accept': 'application/json',
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: jsonEncode({
+  //         'nik': nikController.text,
+  //         'password': passwordController.text,
+  //       }),
+  //     ).timeout(Duration(seconds: 8));
+
+  //     final responseData = jsonDecode(response.body);
+
+  //     if (response.statusCode == 200) {
+  //       // Simpan token dan user data ke SharedPreferences
+  //       final prefs = await SharedPreferences.getInstance();
+  //       await prefs.setString(SharedPrefKeys.token, responseData['token']);
+  //       await prefs.setString(
+  //           SharedPrefKeys.user, jsonEncode(responseData['user']));
+
+  //       Navigator.pushReplacement(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (context) => MainPage(
+  //               responseMessage: responseData['message'] ?? 'Login berhasil'),
+  //         ),
+  //       );
+  //     } else {
+  //       showErrorDialog(responseData['message'] ?? 'Login gagal');
+  //     }
+  //   } catch (e) {
+  //     showErrorDialog('Terjadi kesalahan: $e');
+  //   } finally {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
+
   Future<void> login() async {
     if (nikController.text.isEmpty || passwordController.text.isEmpty) {
       showErrorDialog('NIK dan Password harus diisi!');
@@ -60,17 +120,19 @@ class _LoginPageState extends State<LoginPage>
     });
 
     try {
-      final response = await http.post(
-        Uri.parse('${baseUrl}/api/login'),
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'nik': nikController.text,
-          'password': passwordController.text,
-        }),
-      ).timeout(Duration(seconds: 8));
+      final response = await http
+          .post(
+            Uri.parse('${baseUrl}/api/login'),
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'nik': nikController.text,
+              'password': passwordController.text,
+            }),
+          )
+          .timeout(Duration(seconds: 8));
 
       final responseData = jsonDecode(response.body);
 
@@ -80,6 +142,23 @@ class _LoginPageState extends State<LoginPage>
         await prefs.setString(SharedPrefKeys.token, responseData['token']);
         await prefs.setString(
             SharedPrefKeys.user, jsonEncode(responseData['user']));
+
+        // 🔹 Ambil FCM token device
+        String? fcmToken = await FirebaseMessaging.instance.getToken();
+        if (fcmToken != null) {
+          // 🔹 Kirim FCM token ke backend untuk update tabel users
+          await http.put(
+            Uri.parse('${baseUrl}/api/fcm-token'),
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ${responseData['token']}',
+            },
+            body: jsonEncode({
+              'fcm_token': fcmToken,
+            }),
+          );
+        }
 
         Navigator.pushReplacement(
           context,
@@ -168,7 +247,8 @@ class _LoginPageState extends State<LoginPage>
                       image: AssetImage('assets/images/batik.jpg'),
                       fit: BoxFit.cover,
                       colorFilter: ColorFilter.mode(
-                        Color(0xFF001932).withOpacity(0.5), // bisa sesuaikan transparansinya
+                        Color(0xFF001932)
+                            .withOpacity(0.5), // bisa sesuaikan transparansinya
                         BlendMode.srcOver,
                       ),
                     ),
@@ -250,7 +330,6 @@ class _LoginPageState extends State<LoginPage>
                     ],
                   ),
                 ),
-
 
                 SizedBox(height: 40),
 
@@ -361,7 +440,8 @@ class _LoginPageState extends State<LoginPage>
                             ],
                           ),
                           TextButton(
-                            onPressed: showForgotPasswordDialog, // Updated to call the new dialog
+                            onPressed:
+                                showForgotPasswordDialog, // Updated to call the new dialog
                             child: Text(
                               'Lupa password?',
                               style: TextStyle(
