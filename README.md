@@ -87,5 +87,10 @@ lib/
 ├── services/              # API services
 └── providers/             # State management
 
-
+## 🛠️ Copyright
+<div align="center">
 <p align="center">👨‍💻 <b>Developed with <a href="https://ahmadfadillah.my.id">ahmadfadillllah</a> ❤️ using Flutter & Laravel</b></p>
+
+
+</div>
+
