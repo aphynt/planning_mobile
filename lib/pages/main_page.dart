@@ -932,10 +932,9 @@ class _MainPageState extends State<MainPage> {
 
                 // Quick Actions Grid (dengan tinggi dinamis)
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: SizedBox(
-                    height: isSmallScreen ? 180 : 220,
+                    height: isSmallScreen ? 130 : 160,
                     child: GridView.count(
                       crossAxisCount: 4,
                       physics: const NeverScrollableScrollPhysics(),
@@ -953,8 +952,14 @@ class _MainPageState extends State<MainPage> {
                             ),
                           );
                         }),
-                        _buildQuickAction('KKH', Icons.engineering, () {
-                          _showComingSoonDialog();
+                        _buildQuickAction('KKH', Icons.assignment_turned_in,
+                            () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => KkhListPage(),
+                            ),
+                          );
                         }),
                         _buildQuickAction('P2H', Icons.assignment, () {
                           _showComingSoonDialog();

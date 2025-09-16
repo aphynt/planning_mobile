@@ -1,12 +1,12 @@
 part of 'pages.dart';
 
-
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     });
 
     // ✅ Minta izin notifikasi (WAJIB Android 13 ke atas)
-    _requestNotificationPermission();
+    // _requestNotificationPermission();
 
     // ✅ Dengarkan pesan saat aplikasi sedang aktif
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -44,16 +44,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     _checkAuth();
   }
 
-  // ✅ Fungsi izin notifikasi
-  void _requestNotificationPermission() async {
-    NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+  // // ✅ Fungsi izin notifikasi
+  // void _requestNotificationPermission() async {
+  //   NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
+  //     alert: true,
+  //     badge: true,
+  //     sound: true,
+  //   );
 
-    print('🔒 User granted permission: ${settings.authorizationStatus}');
-  }
+  //   print('🔒 User granted permission: ${settings.authorizationStatus}');
+  // }
 
   Future<void> _checkAuth() async {
     final prefs = await SharedPreferences.getInstance();
@@ -65,7 +65,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => token != null ? MainPage(responseMessage: '') : LoginPage(),
+          builder: (context) =>
+              token != null ? MainPage(responseMessage: '') : LoginPage(),
         ),
       );
     }

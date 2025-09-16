@@ -333,14 +333,16 @@ class _KllhListPageState extends State<KllhListPage>
 
   Widget _buildFuelStationItem(Map<String, dynamic> item) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) =>
                 KLKHFuelStationShowPage(id: item['ID'].toString()),
           ),
         );
+        // ketika kembali dari halaman detail, refresh data
+        _fetchFuelStationData();
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 12), // lebih rapat antar card

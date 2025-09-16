@@ -69,37 +69,66 @@ class _KLKHFuelStationShowPageState extends State<KLKHFuelStationShowPage>
   }
 
   Future<void> _verifyDiketahui(String id) async {
-    bool confirm = await showDialog(
+    final TextEditingController _catatanController = TextEditingController();
+
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Konfirmasi Verifikasi'),
-        content: Text('Apakah Anda yakin ingin memverifikasi data ini?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Apakah Anda yakin ingin memverifikasi data ini?'),
+            SizedBox(height: 10),
+            TextField(
+              controller: _catatanController,
+              decoration: InputDecoration(
+                labelText: 'Catatan (opsional)',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => Navigator.of(context).pop(null),
             child: Text('Batal'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () {
+              Navigator.of(context).pop({
+                "confirmed": true,
+                "catatan": _catatanController.text.trim(),
+              });
+            },
             child: Text('Verifikasi', style: TextStyle(color: Colors.green)),
           ),
         ],
       ),
     );
 
-    if (confirm != true) return;
+    if (result == null || result["confirmed"] != true) return;
+
+    final String? catatan = result["catatan"];
+    print("CATATAN_VERIFIED_DIKETAHUI: $catatan");
 
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString(SharedPrefKeys.token);
+      print('base URL: $baseUrl');
 
-      final response = await http.get(
-        Uri.parse(
-            '$baseUrl/api/klkh/fuel-station/verified/diketahui/$id'), // pastikan endpoint benar
+      final response = await http.put(
+        Uri.parse('$baseUrl/api/klkh/fuel-station/verified/diketahui'),
         headers: {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
         },
+        body: json.encode({
+          'id': id,
+          'catatan_verified_diketahui': catatan,
+        }),
       );
 
       print('STATUS: ${response.statusCode}');
@@ -485,9 +514,32 @@ class _KLKHFuelStationShowPageState extends State<KLKHFuelStationShowPage>
                                     size: 150.0,
                                   ),
                                 ),
+                                Card(
+                                  color: Colors.blue.shade50,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                  elevation: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text('Catatan dari yang mengetahui ',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16)),
+                                        SizedBox(height: 8),
+                                        Text(detailData![
+                                                'CATATAN_VERIFIED_DIKETAHUI'] ??
+                                            '-'),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ],
                             )
-                          : detailData!['DIKETAHUI'] == user['nik']
+                          : detailData!['check_verified'] == "1"
                               ? Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
