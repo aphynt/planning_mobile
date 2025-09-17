@@ -582,7 +582,7 @@ class _KkhListPageState extends State<KkhListPage>
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 2),
                               child: Text(
-                                  ": ${item['NAMA_PENGAWAS'] == null ? 'Belum Ada' : item['NAMA_PENGAWAS']}",
+                                  ": ${item['NAMA_PENGAWAS'] == null ? 'Tidak diketahui' : item['NAMA_PENGAWAS']}",
                                   style: TextStyle(
                                       fontSize: 13, color: Colors.black)),
                             ),
