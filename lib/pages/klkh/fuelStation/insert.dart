@@ -114,7 +114,7 @@ class _KLKHFuelStationInsertPageState extends State<KLKHFuelStationInsertPage>
     _fetchShiftData();
     _fetchDiketahuiData();
 
-    Future.delayed(Duration(seconds: 2), () {
+    Future.delayed(Duration(seconds: 1), () {
       if (pitList.isEmpty) {
         _fetchPitData();
       }

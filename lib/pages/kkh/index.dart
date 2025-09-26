@@ -1,23 +1,4 @@
-import 'dart:io';
-import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:carousel_slider/carousel_controller.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:ui' as ui;
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:survey/pages/notification_page.dart';
-import 'package:survey/pages/pages.dart';
-import 'dart:convert';
-import 'package:url_launcher/url_launcher.dart';
+part of '../pages.dart';
 
 class KkhListPage extends StatefulWidget {
   @override
@@ -35,8 +16,10 @@ class _KkhListPageState extends State<KkhListPage>
   List<Map<String, dynamic>> filteredList = [];
 
   List<dynamic> namaList = [];
+  List<dynamic> selectedIds = [];
   String? selectedNik; // dari Dropdown
-  String selectedShift = "All";
+  String selectedShift = "Semua";
+  String selectedTypeVerified = "Semua";
   // Controllers
   final TextEditingController searchController = TextEditingController();
   DateTime startDate = DateTime.now();
@@ -124,7 +107,73 @@ class _KkhListPageState extends State<KkhListPage>
     }
   }
 
-  Future<void> _fetchKKHData() async {
+  Future<void> _verifikasiBanyakSekaligus() async {
+    if (selectedIds.isEmpty) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("Konfirmasi"),
+        content: Text(
+            "Apakah kamu yakin ingin memverifikasi ${selectedIds.length} data terpilih?"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text("Batal")),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text("Ya")),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString(SharedPrefKeys.token);
+
+      final response = await http.put(
+        Uri.parse("$baseUrl/api/kkh/verifikasi/selection"),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: jsonEncode({"id": selectedIds}),
+      );
+
+      Navigator.pop(context);
+
+      if (response.statusCode == 200) {
+        showSuccessDialog("Berhasil memverifikasi data terpilih");
+        setState(() => selectedIds.clear());
+        _fetchKKHData();
+      } else {
+        String msg = "Gagal memverifikasi data";
+        print(selectedIds);
+        try {
+          final res = jsonDecode(response.body);
+          if (res is Map) {
+            if (res['message'] != null) {
+              msg = res['message']; // ambil pesan utama
+            }
+            if (res['error'] != null) {
+              msg += "\nDetail: ${res['error']}"; // tambahkan detail error kalau ada
+            }
+          }
+        } catch (_) {}
+        showErrorDialog(msg);
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      showErrorDialog("Terjadi kesalahan: $e");
+    }
+  }
+
+  Future<void> _fetchKKHData({String? nik}) async {
     setState(() {
       isLoading = true;
     });
@@ -142,12 +191,23 @@ class _KkhListPageState extends State<KkhListPage>
 
       final formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
       final formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate);
+
+      // prioritas: param nik yg dikirim, kalau null gunakan selectedNik dari state
+      String? nikParam;
+      if (nik != null && nik.isNotEmpty) {
+        nikParam = nik;
+      } else if (selectedNik != null &&
+                selectedNik!.isNotEmpty &&
+                selectedNik != "Semua") {
+        nikParam = selectedNik!.split(" - ")[0]; // ambil NIK saja dari "NIK - Name"
+      }
+
       final queryParams = {
         'startDate': formattedStartDate,
         'endDate': formattedEndDate,
-        if (selectedNik != null && selectedNik!.isNotEmpty)
-          'name': selectedNik!,
-        if (selectedShift != "All") 'shift': selectedShift,
+        if (nikParam != null) 'name': nikParam,
+        if (selectedShift != "Semua") 'shift': selectedShift,
+        if (selectedTypeVerified != "Semua") 'verifikasi': selectedTypeVerified,
       };
 
       print('Fetching KKH data with params: $queryParams');
@@ -164,7 +224,6 @@ class _KkhListPageState extends State<KkhListPage>
           'Authorization': 'Bearer $token',
         },
       );
-      print(response.body);
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -185,6 +244,8 @@ class _KkhListPageState extends State<KkhListPage>
       });
     }
   }
+
+
 
   Future<void> _selectStartDate() async {
     final DateTime? picked = await showDatePicker(
@@ -357,8 +418,36 @@ class _KkhListPageState extends State<KkhListPage>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.person, color: Colors.grey, size: 24),
-                      SizedBox(width: 10),
+                      item['VERIFIKASI'] == "1"
+                          ? Row(
+                              children: [
+                                Icon(Icons.engineering, color: Colors.grey, size: 24),
+                                SizedBox(width: 10),
+                              ],
+                            )
+                          : Checkbox(
+                              value: selectedIds.contains(item['id']),
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  if (value == true) {
+                                    selectedIds.add(item['id']);
+                                  } else {
+                                    selectedIds.remove(item['id']);
+                                  }
+                                });
+                              },
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6), // rounded corner
+                              ),
+                              side: const BorderSide(
+                                color: Colors.grey, // warna garis saat belum dipilih
+                                width: 1.5,
+                              ),
+                              activeColor: const Color(0xFF001932), // warna utama saat terpilih
+                              checkColor: Colors.white, // warna tanda centang
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // biar gak terlalu besar paddingnya
+                            ),
+                      SizedBox(width: 5),
                       Text(
                         item['NAMA_PENGISI'] ?? 'Unknown',
                         style: TextStyle(
@@ -369,6 +458,7 @@ class _KkhListPageState extends State<KkhListPage>
                       ),
                     ],
                   ),
+                  
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
@@ -445,7 +535,7 @@ class _KkhListPageState extends State<KkhListPage>
                           TableRow(children: [
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 2),
-                              child: Text("Jabatan",
+                              child: Text("Role",
                                   style: TextStyle(
                                       fontSize: 13,
                                       color: Colors.black,
@@ -872,53 +962,103 @@ class _KkhListPageState extends State<KkhListPage>
                     ],
                   ),
                   SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      labelText: 'Pilih Nama',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
+                  DropdownSearch<String>(
+                    items: [
+                      "Semua",
+                      ...namaList.map<String>((item) {
+                        return "${item['nik']} - ${item['name']}";
+                      }).toList(),
+                    ],
+                    selectedItem: selectedNik,
+                    popupProps: PopupProps.menu(
+                      showSearchBox: true,
+                      searchFieldProps: TextFieldProps(
+                        decoration: InputDecoration(
+                          hintText: "Cari nama...",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
                     ),
-                    value: selectedNik,
-                    items: namaList.map<DropdownMenuItem<String>>((item) {
-                      return DropdownMenuItem<String>(
-                        value: item['nik'], // simpan nik
-                        child: Text(item['nik'] + ' - ' + item['name']),
-                      );
-                    }).toList(),
+                    dropdownDecoratorProps: DropDownDecoratorProps(
+                      dropdownSearchDecoration: InputDecoration(
+                        labelText: "Pilih Nama",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
                     onChanged: (value) {
                       setState(() {
                         selectedNik = value;
                       });
-                      _fetchKKHData(); // panggil ulang API dengan query name
+
+                      if (value == "Semua") {
+                        _fetchKKHData(); // panggil API tanpa param
+                      } else {
+                        final nik = value!.split(" - ")[0]; // ambil hanya NIK
+                        _fetchKKHData(); // kirim param nik ke API
+                      }
                     },
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      labelText: 'Pilih Shift',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
+                  SizedBox(height: 16),
+                  Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Shift',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        ),
+                        value: selectedShift,
+                        items: ["Semua", "Pagi", "Malam"].map((shift) {
+                          return DropdownMenuItem<String>(
+                            value: shift,
+                            child: Text(shift),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedShift = value!;
+                          });
+                          _fetchKKHData();
+                        },
                       ),
                     ),
-                    value: selectedShift,
-                    items: ["All", "Pagi", "Malam"].map((shift) {
-                      return DropdownMenuItem<String>(
-                        value: shift,
-                        child: Text(shift),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedShift = value!;
-                      });
-                      _fetchKKHData(); // reload data dengan filter shift
-                    },
-                  )
+                    SizedBox(width: 12), // jarak antar dropdown
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Status Verifikasi',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        ),
+                        value: selectedTypeVerified,
+                        items: ["Semua", "Belum diverifikasi", "Sudah diverifikasi"].map((typeverified) {
+                          return DropdownMenuItem<String>(
+                            value: typeverified,
+                            child: Text(typeverified),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedTypeVerified = value!;
+                          });
+                          _fetchKKHData();
+                        },
+                      ),
+                    ),
+                  ],
+                )
+
                 ],
               ),
             ),
@@ -949,6 +1089,39 @@ class _KkhListPageState extends State<KkhListPage>
                           ),
                         ),
             ),
+            if (selectedIds.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: SizedBox(
+                  width: double.infinity, // full width button
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: selectedIds.isNotEmpty 
+                          ? Colors.green[700] 
+                          : Colors.grey, // disable color
+                      elevation: 3,
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.verified, color: Colors.white, size: 22),
+                    label: Text(
+                      selectedIds.isNotEmpty
+                          ? "Verifikasi ${selectedIds.length} data"
+                          : "Pilih data untuk verifikasi",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    onPressed: selectedIds.isNotEmpty 
+                        ? _verifikasiBanyakSekaligus 
+                        : null, // disable kalau kosong
+                  ),
+                ),
+              ),
           ],
         ),
       ),

@@ -14,10 +14,10 @@ import 'dart:ui' as ui;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:survey/pages/kkh/index.dart';
 import 'package:survey/pages/notification_page.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 // import 'package:survey/models/models.dart';
 // import '../services/auth_service.dart';
@@ -31,6 +31,8 @@ part 'klkh/fuelStation/insert.dart';
 part 'klkh/fuelStation/edit.dart';
 part 'klkh/fuelStation/show.dart';
 part 'aktivitas_page.dart';
+part 'profile_page.dart';
+part 'kkh/index.dart';
 
 const String baseUrl = "http://36.67.119.212:9014";
 const String baseUrl2 = "http://36.67.119.212:9011";

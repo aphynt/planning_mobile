@@ -452,7 +452,7 @@ class _MainPageState extends State<MainPage> {
                 ),
               ),
               SizedBox(height: 4),
-              Text('Versi 1.0.1'),
+              Text('Versi 1.0.2'),
               SizedBox(height: 8),
               Text(
                 'Planning E-Report',
@@ -708,6 +708,7 @@ class _MainPageState extends State<MainPage> {
         Future.microtask(() => _showComingSoonDialog());
         return _buildComingSoonPage(); // agar tetap render sesuatu
       case 3:
+      return _buildComingSoonPage();
       case 4:
         return _buildComingSoonPage();
       default:
