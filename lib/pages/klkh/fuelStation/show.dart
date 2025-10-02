@@ -445,20 +445,39 @@ class _KLKHFuelStationShowPageState extends State<KLKHFuelStationShowPage>
                                       SizedBox(height: 4),
                                       Text('Checklist: $displayText',
                                           style: TextStyle(fontSize: 13)),
-                                      if (note != null &&
-                                          note
-                                              .toString()
-                                              .trim()
-                                              .isNotEmpty) ...[
-                                        SizedBox(height: 6),
-                                        Text('Catatan:',
-                                            style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w500)),
-                                        Text(note.toString(),
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.grey[800])),
+                                      if (note != null && note.toString().trim().isNotEmpty) ...[
+                                        const SizedBox(height: 6),
+                                        Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFFF3CD),                 // bg alert-warning
+                                            border: Border.all(color: const Color(0xFFFFECB5)), // border alert-warning
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              const Text(
+                                                'Catatan:',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Color(0xFF664D03), // text alert-warning
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                note.toString(),
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  // pakai konstan juga biar gak bentrok dengan const
+                                                  // (atau ganti sesuai selera)
+                                                  color: Color(0xFF664D03),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ],
                                     ],
                                   ),
