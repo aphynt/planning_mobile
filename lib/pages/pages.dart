@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -18,6 +19,7 @@ import 'package:survey/pages/notification_page.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 // import 'package:survey/models/models.dart';
 // import '../services/auth_service.dart';
@@ -33,8 +35,11 @@ part 'klkh/fuelStation/show.dart';
 part 'aktivitas_page.dart';
 part 'profile_page.dart';
 part 'kkh/index.dart';
+part 'sop/index.dart';
+part 'sop/detail.dart';
 
 const String baseUrl = "http://36.67.119.212:9014";
+// const String baseUrl = "http://127.0.0.1:8002";
 const String baseUrl2 = "http://36.67.119.212:9011";
 
 String formatTanggal(String? rawDate) {

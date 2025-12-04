@@ -962,6 +962,15 @@ class _MainPageState extends State<MainPage> {
                             ),
                           );
                         }),
+                        _buildQuickAction('SOP', Icons.description,
+                            () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SOPListPage(),
+                            ),
+                          );
+                        }),
                         _buildQuickAction('P2H', Icons.assignment, () {
                           _showComingSoonDialog();
                         }),

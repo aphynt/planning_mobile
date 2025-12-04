@@ -171,7 +171,8 @@ class _LoginPageState extends State<LoginPage>
         showErrorDialog(responseData['message'] ?? 'Login gagal');
       }
     } catch (e) {
-      showErrorDialog('Terjadi kesalahan: $e');
+      // showErrorDialog('Terjadi kesalahan: $e');
+      showErrorDialog('Terjadi kesalahan: Jaringan tidak stabil');
     } finally {
       setState(() {
         isLoading = false;
@@ -508,14 +509,14 @@ class _LoginPageState extends State<LoginPage>
                       Center(
                         child: RichText(
                           text: TextSpan(
-                            text: 'Powered by ',
+                            text: '© Powered by ',
                             style: TextStyle(
                               color: Colors.grey.shade600,
                               fontSize: 14,
                             ),
                             children: [
                               TextSpan(
-                                text: 'IT - FMS Support',
+                                text: 'IT',
                                 style: TextStyle(
                                   color: Color(0xFF001932), // Primary color
                                   fontWeight: FontWeight.w500,

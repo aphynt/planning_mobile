@@ -112,7 +112,8 @@ class _KllhListPageState extends State<KllhListPage>
       }
     } catch (e) {
       print('Error fetching fuel station data: $e');
-      showErrorDialog('Gagal memuat data: $e');
+      // showErrorDialog('Gagal memuat data: $e');
+      showErrorDialog('Gagal memuat data: Jaringan tidak stabil');
     } finally {
       setState(() {
         isLoading = false;

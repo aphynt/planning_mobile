@@ -97,7 +97,8 @@ class _AktivitasPageState extends State<AktivitasPage>
       }
     } catch (e) {
       print('Error fetching aktivitas data: $e');
-      showErrorDialog('Gagal memuat data: $e');
+      // showErrorDialog('Gagal memuat data: $e');
+      showErrorDialog('Gagal memuat data: Jaringan tidak stabil');
     } finally {
       setState(() {
         isLoading = false;
