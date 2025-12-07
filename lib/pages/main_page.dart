@@ -708,9 +708,9 @@ class _MainPageState extends State<MainPage> {
         Future.microtask(() => _showComingSoonDialog());
         return _buildComingSoonPage(); // agar tetap render sesuatu
       case 3:
-      return _buildComingSoonPage();
-      case 4:
         return _buildComingSoonPage();
+      case 4:
+        return ProfilePage();
       default:
         return _buildHomePage();
     }
@@ -935,7 +935,7 @@ class _MainPageState extends State<MainPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: SizedBox(
-                    height: isSmallScreen ? 130 : 160,
+                    height: isSmallScreen ? 160 : 230,
                     child: GridView.count(
                       crossAxisCount: 4,
                       physics: const NeverScrollableScrollPhysics(),
@@ -962,8 +962,7 @@ class _MainPageState extends State<MainPage> {
                             ),
                           );
                         }),
-                        _buildQuickAction('SOP', Icons.description,
-                            () {
+                        _buildQuickAction('SOP', Icons.description, () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(

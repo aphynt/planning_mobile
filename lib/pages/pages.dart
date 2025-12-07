@@ -39,7 +39,6 @@ part 'sop/index.dart';
 part 'sop/detail.dart';
 
 const String baseUrl = "http://36.67.119.212:9014";
-// const String baseUrl = "http://127.0.0.1:8002";
 const String baseUrl2 = "http://36.67.119.212:9011";
 
 String formatTanggal(String? rawDate) {
